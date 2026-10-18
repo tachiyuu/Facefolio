@@ -51,7 +51,11 @@ class MainViewModel(
             Script(settings.hideReels.value, R.raw.hide_reels, "hide_reels.js"),
             Script(settings.hideStories.value, R.raw.hide_stories, "hide_stories.js"),
             Script(settings.hidePeopleYouMayKnow.value, R.raw.hide_pymk, "hide_pymk.js"),
-            Script(settings.hideGroups.value, R.raw.hide_groups, "hide_groups.js")
+            Script(settings.hideGroups.value, R.raw.hide_groups, "hide_groups.js"),
+            Script(settings.hideMarketplace.value, R.raw.hide_marketplace, "hide_marketplace.js"),
+            Script(settings.hideCounts.value, R.raw.hide_counts, "hide_counts.js"),
+            Script(settings.quietBadges.value, R.raw.quiet_badges, "quiet_badges.js"),
+            Script(true, R.raw.feed_pill, "feed_pill.js") // shows itself only once the feed filter hid something
         )
 
         viewModelScope.launch {

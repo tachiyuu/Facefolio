@@ -18,3 +18,18 @@ fun fetchScripts(
         append(fallbackContent(script.resourceId))
     }
 }
+
+// Runs the scripts once per page, as soon as the DOM exists. Injected at document start where
+// supported (so the feed filter sees items as they appear and ads never flash), and again after
+// load as a fallback, which the flag turns into a no-op.
+fun wrapScripts(scripts: String): String = """
+    (function() {
+        if (window.top !== window || window.__mbInjected) return;
+        window.__mbInjected = true;
+        const run = () => {
+$scripts
+        };
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run, { once: true });
+        else run();
+    })();
+""".trimIndent()

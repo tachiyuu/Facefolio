@@ -21,26 +21,13 @@
 
   } else {
     const ICONS = ['󲀠', '󰣝'];
-    const FLAG = 'data-reel-hidden';
 
-    const handle = node => {
-      if (!(node instanceof HTMLElement)) return;
-      const items = node.matches('.fl.ac .native-text') ? [node] : node.querySelectorAll('.fl.ac .native-text');
-      items.forEach(el => {
-        if (ICONS.includes(el.textContent.trim())) {
-          const box = el.closest('[data-tracking-duration-id]');
-          if (box && !box.hasAttribute(FLAG)) {
-            box.setAttribute(FLAG, '1');
-            box.style.display = 'none';
-          }
-        }
-      });
-    };
+    // Reels shelves in the feed go through the feed filter, so the feed pill counts them
+    window.addFeedFilter(unit =>
+      [...unit.querySelectorAll('.fl.ac .native-text')].some(el => ICONS.includes(el.textContent.trim()))
+    );
 
-    document.querySelectorAll('.fl.ac .native-text').forEach(handle);
-
-    new MutationObserver(muts => {
-      muts.forEach(m => m.addedNodes.forEach(handle));
-    }).observe(document.body, { childList: true, subtree: true });
+    window.hideHeaderTab('reels', ICONS[0]);
+    window.hideHeaderTab('video', ICONS[1]);
   }
 })();

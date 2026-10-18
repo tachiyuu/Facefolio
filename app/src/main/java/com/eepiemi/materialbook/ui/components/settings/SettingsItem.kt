@@ -98,6 +98,16 @@ fun SettingsSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
 }
 
 @Composable
+fun SettingsSection(title: String) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleSmall,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(start = 8.dp, top = 16.dp, bottom = 4.dp)
+    )
+}
+
+@Composable
 fun SettingsGroup(
     items: List<SettingsItem>,
     modifier: Modifier = Modifier

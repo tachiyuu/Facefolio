@@ -17,16 +17,19 @@ import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material.icons.filled.Diversity1
 import androidx.compose.material.icons.filled.EmojiPeople
 import androidx.compose.material.icons.filled.Padding
+import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material.icons.filled.Try
 import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.DesktopWindows
 import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material.icons.outlined.GridView
+import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.PanoramaWideAngle
 import androidx.compose.material.icons.outlined.Pinch
 import androidx.compose.material.icons.outlined.Shield
+import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -69,12 +72,26 @@ fun SettingsContent(
     val materialYou = viewModel.materialYou.collectAsState()
     val amoledBlack = viewModel.amoledBlack.collectAsState()
 
+    val hideCounts = viewModel.hideCounts.collectAsState()
+    val quietBadges = viewModel.quietBadges.collectAsState()
+
     val isAutoDesktop = rememberAutoDesktop()
+
+    // "Show in feed" row says what is currently hidden
+    val hiddenInFeed = listOf(
+        viewModel.hideSuggested.collectAsState().value to R.string.suggested_posts,
+        viewModel.hidePeopleYouMayKnow.collectAsState().value to R.string.people_you_may_know,
+        viewModel.hideReels.collectAsState().value to R.string.reels,
+        viewModel.hideStories.collectAsState().value to R.string.stories,
+        viewModel.hideMarketplace.collectAsState().value to R.string.marketplace,
+        viewModel.hideGroups.collectAsState().value to R.string.groups,
+    ).filter { it.first }.map { stringResource(it.second).lowercase() }
 
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
+        SettingsSection(stringResource(R.string.section_feed))
         SettingsGroup(
             items = listOf(
                 SettingsItem(
@@ -84,6 +101,74 @@ fun SettingsContent(
                     isActive = removeAds.value,
                     onClick = { viewModel.setRemoveAds(!removeAds.value) },
                 ),
+                SettingsItem(
+                    icon = Icons.Outlined.GridView,
+                    title = stringResource(R.string.show_in_feed_title),
+                    supportingText = if (hiddenInFeed.isEmpty()) stringResource(R.string.show_in_feed_all_shown)
+                        else stringResource(R.string.show_in_feed_hidden_summary, hiddenInFeed.joinToString(", ")),
+                    isActive = null,
+                    onClick = { isOpenDialog = true },
+                )
+            )
+        )
+
+        SettingsSection(stringResource(R.string.section_fewer_distractions))
+        SettingsGroup(
+            items = listOf(
+                SettingsItem(
+                    icon = Icons.Outlined.VisibilityOff,
+                    title = stringResource(R.string.hide_counts_title),
+                    supportingText = stringResource(R.string.hide_counts_summary),
+                    isActive = hideCounts.value,
+                    onClick = { viewModel.setHideCounts(!hideCounts.value) }
+                ),
+                SettingsItem(
+                    icon = Icons.Outlined.NotificationsNone,
+                    title = stringResource(R.string.quiet_badges_title),
+                    supportingText = stringResource(R.string.quiet_badges_summary),
+                    isActive = quietBadges.value,
+                    onClick = { viewModel.setQuietBadges(!quietBadges.value) }
+                )
+            )
+        )
+
+        SettingsSection(stringResource(R.string.section_look))
+        SettingsGroup(
+            items = listOf(
+                SettingsItem(
+                    icon = Icons.Outlined.Palette,
+                    title = stringResource(R.string.material_you_title),
+                    supportingText = stringResource(R.string.enable_material_you_theming_for_facebook),
+                    isActive = materialYou.value,
+                    onClick = { viewModel.setMaterialYou(!materialYou.value) }
+                ),
+                SettingsItem(
+                    icon = Icons.Outlined.Circle,
+                    title = stringResource(R.string.amoled_black_title),
+                    supportingText = stringResource(R.string.enable_pure_black_theme_for_amoled_displays),
+                    isActive = amoledBlack.value,
+                    onClick = { viewModel.setAmoledBlack(!amoledBlack.value) }
+                ),
+                SettingsItem(
+                    icon = Icons.Default.Padding,
+                    title = stringResource(R.string.sticky_navbar_title),
+                    supportingText = stringResource(R.string.keep_the_navigation_bar_visible_while_scrolling),
+                    isActive = stickyNavbar.value,
+                    onClick = { viewModel.setStickyNavbar(!stickyNavbar.value) }
+                ),
+                SettingsItem(
+                    icon = Icons.Outlined.PanoramaWideAngle,
+                    title = stringResource(R.string.immersive_mode_title),
+                    supportingText = stringResource(R.string.hide_system_bars_for_a_fullscreen_experience),
+                    isActive = immersiveMode.value,
+                    onClick = { viewModel.setImmersiveMode(!immersiveMode.value) }
+                )
+            )
+        )
+
+        SettingsSection(stringResource(R.string.section_advanced))
+        SettingsGroup(
+            items = listOf(
                 SettingsItem(
                     icon = Icons.Outlined.FileDownload,
                     title = stringResource(R.string.download_content_title),
@@ -99,18 +184,6 @@ fun SettingsContent(
                     onClick = { viewModel.setEnableCopyToClipboard(!enableCopyToClipboard.value) },
                 ),
                 SettingsItem(
-                    icon = Icons.Outlined.GridView,
-                    title = stringResource(R.string.customize_feed_title),
-                    supportingText = stringResource(R.string.customize_feed),
-                    isActive = null,
-                    onClick = { isOpenDialog = true },
-                )
-            )
-        )
-
-        SettingsGroup(
-            items = listOf(
-                SettingsItem(
                     icon = Icons.Outlined.Pinch,
                     title = stringResource(R.string.pinch_to_zoom_title),
                     supportingText = stringResource(R.string.use_two_fingers_to_zoom_in_or_out),
@@ -123,34 +196,6 @@ fun SettingsContent(
                     supportingText = stringResource(R.string.force_desktop_layout_may_not_be_suitable_for_smaller_display),
                     isActive = desktopLayout.value,
                     onClick = { if (!isAutoDesktop) viewModel.setDesktopLayout(!desktopLayout.value) }
-                ),
-                SettingsItem(
-                    icon = Icons.Outlined.PanoramaWideAngle,
-                    title = stringResource(R.string.immersive_mode_title),
-                    supportingText = stringResource(R.string.hide_system_bars_for_a_fullscreen_experience),
-                    isActive = immersiveMode.value,
-                    onClick = { viewModel.setImmersiveMode(!immersiveMode.value) }
-                ),
-                SettingsItem(
-                    icon = Icons.Default.Padding,
-                    title = stringResource(R.string.sticky_navbar_title),
-                    supportingText = stringResource(R.string.keep_the_navigation_bar_visible_while_scrolling),
-                    isActive = stickyNavbar.value,
-                    onClick = { viewModel.setStickyNavbar(!stickyNavbar.value) }
-                ),
-                SettingsItem(
-                    icon = Icons.Outlined.Palette,
-                    title = stringResource(R.string.material_you_title),
-                    supportingText = stringResource(R.string.enable_material_you_theming_for_facebook),
-                    isActive = materialYou.value,
-                    onClick = { viewModel.setMaterialYou(!materialYou.value) }
-                ),
-                SettingsItem(
-                    icon = Icons.Outlined.Circle,
-                    title = stringResource(R.string.amoled_black_title),
-                    supportingText = stringResource(R.string.enable_pure_black_theme_for_amoled_displays),
-                    isActive = amoledBlack.value,
-                    onClick = { viewModel.setAmoledBlack(!amoledBlack.value) }
                 )
             )
         )
@@ -197,6 +242,7 @@ private fun HideOptionsDialog(
     val hideStories = viewModel.hideStories.collectAsState()
     val hidePeopleYouMayKnow = viewModel.hidePeopleYouMayKnow.collectAsState()
     val hideGroups = viewModel.hideGroups.collectAsState()
+    val hideMarketplace = viewModel.hideMarketplace.collectAsState()
 
     // Switches here mean "shown in feed": on = visible, off = hidden (stored settings are "hide X")
     Dialog(
@@ -234,6 +280,9 @@ private fun HideOptionsDialog(
             }
             FeedItemToggle(Icons.Filled.BurstMode, stringResource(R.string.stories), hideStories.value) {
                 viewModel.setHideStories(!hideStories.value)
+            }
+            FeedItemToggle(Icons.Filled.Storefront, stringResource(R.string.marketplace), hideMarketplace.value) {
+                viewModel.setHideMarketplace(!hideMarketplace.value)
             }
             if (!viewModel.desktopLayout.collectAsState().value) {
                 FeedItemToggle(Icons.Filled.Diversity1, stringResource(R.string.groups), hideGroups.value) {

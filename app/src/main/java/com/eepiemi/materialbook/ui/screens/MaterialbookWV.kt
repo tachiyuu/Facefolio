@@ -50,6 +50,10 @@ import com.eepiemi.materialbook.utils.jsBridge.ThemeChange
 import com.eepiemi.materialbook.utils.jsBridge.MaterialYouBridge
 import com.eepiemi.materialbook.utils.rememberAutoDesktop
 import com.eepiemi.materialbook.utils.rememberImeHeight
+import com.eepiemi.materialbook.utils.wrapScripts
+import androidx.webkit.ScriptHandler
+import androidx.webkit.WebViewCompat
+import androidx.webkit.WebViewFeature
 import kotlinx.coroutines.delay
 
 @Composable
@@ -166,11 +170,30 @@ fun MaterialbookWebView(
 
     val userScripts by viewModel.scripts
     val loadingState = state.loadingState
+    var webView by remember { mutableStateOf<android.webkit.WebView?>(null) }
+    var documentStartScript by remember { mutableStateOf<ScriptHandler?>(null) }
+    var pendingReload by remember { mutableStateOf(false) }
+
+    // Register the scripts to run at document start, then reload if settings asked for it
+    LaunchedEffect(webView, userScripts, pendingReload) {
+        val view = webView ?: return@LaunchedEffect
+        val scripts = userScripts ?: return@LaunchedEffect
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {
+            documentStartScript?.remove()
+            documentStartScript = WebViewCompat.addDocumentStartJavaScript(
+                view, wrapScripts(scripts), setOf("https://*.facebook.com")
+            )
+        }
+        if (pendingReload) {
+            pendingReload = false
+            navigator.reload()
+        }
+    }
 
     LaunchedEffect(loadingState, userScripts) {
         if (loadingState is LoadingState.Finished) {
             userScripts?.let { scripts ->
-                navigator.evaluateJavaScript(scripts) {
+                navigator.evaluateJavaScript(wrapScripts(scripts)) {
                     isLoading = false
                 }
             }
@@ -202,7 +225,7 @@ fun MaterialbookWebView(
                     resources = resources,
                     settings = settingsVM
                 )
-                navigator.reload()
+                pendingReload = true
             }
         )
     }
@@ -255,11 +278,12 @@ fun MaterialbookWebView(
         navigator = navigator,
         platformWebViewParams = fileChooserWebViewParams(),
         captureBackPresses = false,
-        onCreated = { webView ->
+        onCreated = { createdWebView ->
+            webView = createdWebView
 
             val cookieManager = CookieManager.getInstance()
             cookieManager.setAcceptCookie(true)
-            cookieManager.setAcceptThirdPartyCookies(webView, true)
+            cookieManager.setAcceptThirdPartyCookies(createdWebView, true)
             cookieManager.flush()
 
             state.webSettings.apply {
@@ -273,7 +297,7 @@ fun MaterialbookWebView(
                 }
             }
 
-            webView.apply {
+            createdWebView.apply {
                 addJavascriptInterface(
                     MaterialbookSettings { settingsToggle = true },
                     "SettingsBridge"

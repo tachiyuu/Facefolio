@@ -9,13 +9,16 @@ import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.AMOLED_BL
 import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.DESKTOP_LAYOUT
 import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.ENABLE_COPY_TO_CLIPBOARD
 import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.ENABLE_DOWNLOAD_CONTENT
+import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.HIDE_COUNTS
 import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.HIDE_GROUPS
+import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.HIDE_MARKETPLACE
 import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.HIDE_PEOPLE_YOU_MAY_KNOW
 import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.HIDE_REELS
 import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.HIDE_STORIES
 import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.HIDE_SUGGESTED
 import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.IMMERSIVE_MODE
 import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.PINCH_TO_ZOOM
+import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.QUIET_BADGES
 import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.REMOVE_ADS
 import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.STICKY_NAVBAR
 import kotlinx.coroutines.flow.SharingStarted
@@ -101,6 +104,21 @@ class SettingsViewModel(
     val hideGroups = dataStore.hideGroups.stateIn(
         scope = viewModelScope,
         initialValue = initialPrefs[HIDE_GROUPS] ?: false,
+        started = SharingStarted.WhileSubscribed()
+    )
+    val hideMarketplace = dataStore.hideMarketplace.stateIn(
+        scope = viewModelScope,
+        initialValue = initialPrefs[HIDE_MARKETPLACE] ?: false,
+        started = SharingStarted.WhileSubscribed()
+    )
+    val hideCounts = dataStore.hideCounts.stateIn(
+        scope = viewModelScope,
+        initialValue = initialPrefs[HIDE_COUNTS] ?: false,
+        started = SharingStarted.WhileSubscribed()
+    )
+    val quietBadges = dataStore.quietBadges.stateIn(
+        scope = viewModelScope,
+        initialValue = initialPrefs[QUIET_BADGES] ?: false,
         started = SharingStarted.WhileSubscribed()
     )
     val isRevertDesktop = dataStore.revertDesktop.stateIn(
@@ -190,6 +208,24 @@ class SettingsViewModel(
     fun setHideGroups(hideGroups: Boolean) {
         viewModelScope.launch {
             dataStore.setHideGroups(hideGroups)
+        }
+    }
+
+    fun setHideMarketplace(hideMarketplace: Boolean) {
+        viewModelScope.launch {
+            dataStore.setHideMarketplace(hideMarketplace)
+        }
+    }
+
+    fun setHideCounts(hideCounts: Boolean) {
+        viewModelScope.launch {
+            dataStore.setHideCounts(hideCounts)
+        }
+    }
+
+    fun setQuietBadges(quietBadges: Boolean) {
+        viewModelScope.launch {
+            dataStore.setQuietBadges(quietBadges)
         }
     }
 

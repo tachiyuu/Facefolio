@@ -29,7 +29,11 @@
     const rules = [];
 
     const style = document.createElement('style');
-    style.textContent = `[${MARK}] { display: none !important; }`;
+    // html.mb-peek (set by the feed pill) shows hidden items again, dimmed
+    style.textContent = `
+        html:not(.mb-peek) [${MARK}] { display: none !important; }
+        html.mb-peek [${MARK}=""] { opacity: 0.5; }
+    `;
     document.head.appendChild(style);
 
     const normalize = text => text
@@ -72,19 +76,22 @@
 
     function check(unit) {
         if (!unit.isConnected || unit.hasAttribute(MARK)) return;
+        if (unit.querySelector('[role="tab"]')) return; // the mobile header is a feed item too
+
         const texts = labels(unit);
         if (!rules.some(rule => rule(unit, texts))) return;
         unit.setAttribute(MARK, '');
 
         // Mobile feed draws a thin separator before each post
         const separator = unit.previousElementSibling;
-        if (separator && !separator.matches(UNIT) && separator.offsetHeight <= 12) separator.setAttribute(MARK, '');
+        if (separator && !separator.matches(UNIT) && separator.offsetHeight <= 12) separator.setAttribute(MARK, 'separator');
+        hiddenChanged = true;
     }
 
     // Changes inside an item re-check only that item. Anything added outside items (new posts,
     // the hidden <svg> holding label text) re-checks every item. Batched per frame.
     const pending = new Set();
-    let sweep = false, scheduled = false;
+    let sweep = false, scheduled = false, hiddenChanged = false;
 
     const flush = () => {
         scheduled = false;
@@ -92,6 +99,8 @@
         sweep = false;
         pending.forEach(check);
         pending.clear();
+        if (hiddenChanged) document.dispatchEvent(new Event('mb-feed-hidden'));
+        hiddenChanged = false;
     };
 
     const schedule = () => {
@@ -121,7 +130,49 @@
 })();
 
 
+// Header tabs (mobile): hideHeaderTab(name, glyph) removes a tab such as reels or marketplace.
+// Facebook places each tab at a fixed x offset, so the remaining ones are spread out again.
+(() => {
+    const hidden = [];
+    const barStyle = document.createElement('style');
+    document.head.appendChild(barStyle);
 
+    function relayout() {
+        const tablist = document.querySelector('div[role="tablist"]');
+        if (!tablist) return;
+        const tabs = [...tablist.querySelectorAll('div[role="tab"]')];
+        const visible = tabs.filter(tab => {
+            const label = (tab.getAttribute('aria-label') || '').toLowerCase();
+            const text = tab.textContent;
+            const hide = hidden.some(([name, glyph]) => label.startsWith(name) || text.includes(glyph));
+            if (hide && tab.style.display !== 'none') tab.style.display = 'none';
+            return !hide;
+        });
+        // Tabs no longer cover the whole bar, so give the bar the tabs' own background
+        // (painted by a ::before, like most of Facebook's mobile backgrounds). Facebook rewrites the
+        // bar's inline style, so this goes in a stylesheet.
+        const background = visible[0] && getComputedStyle(visible[0], '::before').backgroundColor;
+        const rule = background ? `div[role="tablist"] { background-color: ${background} !important; }` : '';
+        if (barStyle.textContent !== rule) barStyle.textContent = rule;
+        const slot = tablist.offsetWidth / visible.length;
+        visible.forEach((tab, i) => {
+            const left = Math.round(i * slot + (slot - tab.offsetWidth) / 2) + 'px';
+            if (tab.style.marginLeft !== left) tab.style.marginLeft = left;
+        });
+    }
+
+    let scheduled = false;
+    new MutationObserver(() => {
+        if (!hidden.length || scheduled) return;
+        scheduled = true;
+        requestAnimationFrame(() => { scheduled = false; relayout(); });
+    }).observe(document.body, { childList: true, subtree: true });
+
+    window.hideHeaderTab = (name, glyph) => {
+        hidden.push([name, glyph]);
+        relayout();
+    };
+})();
 
 
 (function() {

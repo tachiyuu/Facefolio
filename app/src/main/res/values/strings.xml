@@ -46,4 +46,15 @@
     <string name="materialbook_settings">Materialbook settings</string>
     <string name="support_my_work">Support my work! ☕</string>
     <string name="not_supported">Not supported</string>
+    <string name="section_feed">Feed</string>
+    <string name="section_fewer_distractions">Fewer distractions</string>
+    <string name="section_look">Look</string>
+    <string name="section_advanced">Advanced</string>
+    <string name="marketplace">Marketplace</string>
+    <string name="show_in_feed_all_shown">Everything is shown</string>
+    <string name="show_in_feed_hidden_summary">Hidden: %1$s</string>
+    <string name="hide_counts_title">Hide like &amp; share counts</string>
+    <string name="hide_counts_summary">Posts without the numbers game</string>
+    <string name="quiet_badges_title">Quiet badges</string>
+    <string name="quiet_badges_summary">A dot instead of unread numbers</string>
 </resources>

@@ -148,6 +148,7 @@
             if (hide && tab.style.display !== 'none') tab.style.display = 'none';
             return !hide;
         });
+        if (!visible.length) return;
         // Tabs no longer cover the whole bar, so give the bar the tabs' own background
         // (painted by a ::before, like most of Facebook's mobile backgrounds). Facebook rewrites the
         // bar's inline style, so this goes in a stylesheet.

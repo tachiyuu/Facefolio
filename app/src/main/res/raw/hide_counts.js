@@ -3,7 +3,8 @@
 (() => {
     const MARK = 'data-mb-count';
     const NUMBER = /^\d[\d.,\s]*[KMBkmb]?$/;
-    const TEXT = '[role="button"] [data-mcomponent="TextArea"]:not([aria-hidden="true"])';
+    // TextArea in the feed, ServerTextArea on a post's own page
+    const TEXT = '[role="button"] [data-type="text"]:not([aria-hidden="true"])';
 
     const style = document.createElement('style');
     style.textContent = `[${MARK}] { display: none !important; }`;

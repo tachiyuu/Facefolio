@@ -15,7 +15,10 @@ fun fetchScripts(
     fallbackContent: (Int) -> String
 ): String = buildString {
     scripts.filter { it.isEnabled }.forEach { script ->
+        // One failing script must not stop the ones after it
+        append("try {\n")
         append(fallbackContent(script.resourceId))
+        append("\n} catch (e) { console.error('[Materialbook] ${script.scriptTitle}', e); }\n")
     }
 }
 

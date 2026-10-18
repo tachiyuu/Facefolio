@@ -81,7 +81,7 @@ class SettingsDataStore(private val context: Context) {
         context.dataStore.edit { it[AMOLED_BLACK] = amoledBlack }
     }
 
-    val hideSuggested = context.dataStore.data.map { it[HIDE_SUGGESTED] ?: false }
+    val hideSuggested = context.dataStore.data.map { it[HIDE_SUGGESTED] ?: true }
     suspend fun setHideSuggested(hideSuggestion: Boolean) {
         context.dataStore.edit { it[HIDE_SUGGESTED] = hideSuggestion }
     }
@@ -96,7 +96,7 @@ class SettingsDataStore(private val context: Context) {
         context.dataStore.edit { it[HIDE_STORIES] = hideStories }
     }
 
-    val hidePeopleYouMayKnow = context.dataStore.data.map { it[HIDE_PEOPLE_YOU_MAY_KNOW] ?: false }
+    val hidePeopleYouMayKnow = context.dataStore.data.map { it[HIDE_PEOPLE_YOU_MAY_KNOW] ?: true }
     suspend fun setHidePeopleYouMayKnow(hidePeopleYouMayKnow: Boolean) {
         context.dataStore.edit { it[HIDE_PEOPLE_YOU_MAY_KNOW] = hidePeopleYouMayKnow }
     }

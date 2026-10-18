@@ -21,6 +21,105 @@
     };
 })();
 
+// Feed filter: hides whole feed items matched by any registered rule (ads, suggested posts, ...).
+// Rules get the item and its short labels, so they don't depend on Facebook's markup or obfuscation.
+(() => {
+    const UNIT = '[aria-posinset], div[data-tracking-duration-id], div.vertically-snappable, article';
+    const MARK = 'data-mb-hidden';
+    const rules = [];
+
+    const style = document.createElement('style');
+    style.textContent = `[${MARK}] { display: none !important; }`;
+    document.head.appendChild(style);
+
+    const normalize = text => text
+        .replace(/[\u200B-\u200F\uFEFF]/g, '')
+        .replace(/^[\s·•.]+|[\s·•.]+$/g, '')
+        .toLowerCase();
+
+    // Short texts of an item in document order. Labels may be plain text or
+    // <svg><use href="#id"> pointing at a hidden <text> elsewhere in the page.
+    // Facebook pads items with aria-hidden decoy texts, those are skipped.
+    function labels(unit) {
+        const out = [];
+        const walker = document.createTreeWalker(unit, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
+        for (let node; (node = walker.nextNode());) {
+            let text = null;
+            if (node.nodeType === Node.TEXT_NODE) {
+                if (!node.parentElement.closest('[aria-hidden="true"]')) text = node.textContent;
+            }
+            else if (node.localName === 'use') {
+                const ref = (node.getAttribute('href') || node.getAttribute('xlink:href') || '').slice(1);
+                text = ref && document.getElementById(ref)?.textContent;
+            }
+            if (text && text.length <= 40) {
+                const clean = normalize(text);
+                if (clean) out.push(clean);
+            }
+        }
+        return out;
+    }
+
+    // Items can nest (e.g. an article inside a positioned feed item): always act on the outermost one
+    function outerUnit(el) {
+        let unit = el.closest(UNIT), outer = null;
+        while (unit) {
+            outer = unit;
+            unit = unit.parentElement?.closest(UNIT);
+        }
+        return outer;
+    }
+
+    function check(unit) {
+        if (!unit.isConnected || unit.hasAttribute(MARK)) return;
+        const texts = labels(unit);
+        if (!rules.some(rule => rule(unit, texts))) return;
+        unit.setAttribute(MARK, '');
+
+        // Mobile feed draws a thin separator before each post
+        const separator = unit.previousElementSibling;
+        if (separator && !separator.matches(UNIT) && separator.offsetHeight <= 12) separator.setAttribute(MARK, '');
+    }
+
+    // Changes inside an item re-check only that item. Anything added outside items (new posts,
+    // the hidden <svg> holding label text) re-checks every item. Batched per frame.
+    const pending = new Set();
+    let sweep = false, scheduled = false;
+
+    const flush = () => {
+        scheduled = false;
+        if (sweep) document.querySelectorAll(UNIT).forEach(u => pending.add(outerUnit(u)));
+        sweep = false;
+        pending.forEach(check);
+        pending.clear();
+    };
+
+    const schedule = () => {
+        if (scheduled) return;
+        scheduled = true;
+        requestAnimationFrame(flush);
+    };
+
+    new MutationObserver(mutations => {
+        if (!rules.length) return;
+        for (const m of mutations) {
+            const target = m.target.nodeType === 1 ? m.target : m.target.parentElement;
+            const unit = target && outerUnit(target);
+            if (unit) pending.add(unit);
+            else if (m.addedNodes.length) sweep = true;
+        }
+        if (sweep || pending.size) schedule();
+    }).observe(document.body, { childList: true, subtree: true, characterData: true });
+
+    // rule(unit, labels) => true to hide the item. labels are passed through normalizeFeedLabel.
+    window.normalizeFeedLabel = normalize;
+    window.addFeedFilter = rule => {
+        rules.push(rule);
+        sweep = true;
+        schedule();
+    };
+})();
+
 
 
 

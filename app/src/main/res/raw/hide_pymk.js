@@ -2,7 +2,7 @@
 (function() {
   const hidePymk = () => {
     if (!window.location.href.includes('facebook.com/search/')) return;
-    
+
     const imgArea = document.querySelector('[data-mcomponent="ImageArea"]');
     const suggCont = imgArea?.nextElementSibling;
 
@@ -22,20 +22,15 @@
 })();
 
 
-// Hide "People You May Know" suggestions in the main feed
+// Hide "People You May Know" cards in the feed (see addFeedFilter in scripts.js)
 (() => {
-  const hidePymk = (nodes) => {
-    if (window.location.pathname !== '/') return;
-    nodes.forEach(node => {
-      if (!(node instanceof HTMLElement)) return;
-      const targets = node.matches('.hscroller') ? [node] : node.querySelectorAll?.('.hscroller') || [];
-      targets.forEach(el => el.closest('[data-tracking-duration-id]')?.style.setProperty('display', 'none'));
-    });
-  };
+  const LABELS = new Set([
+    'People you may know', 'Những người bạn có thể biết', 'Những người bạn có thể quen',
+    'Personas que quizás conozcas', 'Personen, die du kennen könntest',
+    'Vous connaissez peut-être', 'Pessoas que talvez conheças', 'Pessoas que você talvez conheça'
+  ].map(window.normalizeFeedLabel));
 
-  hidePymk([document.body]);
-
-  new MutationObserver(muts =>
-    muts.forEach(m => hidePymk([...m.addedNodes]))
-  ).observe(document.body, { childList: true, subtree: true });
+  window.addFeedFilter((unit, labels) =>
+    labels.slice(0, 4).some(text => LABELS.has(text))
+  );
 })();

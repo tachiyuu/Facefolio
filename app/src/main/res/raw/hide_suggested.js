@@ -1,72 +1,21 @@
-// Hide suggested posts from feed
+// Hide suggested content from the home feed: posts from people/pages/groups you don't follow
+// carry a "Follow" / "Join" button or a "Suggested for you" label in their header.
 (function() {
+    'use strict';
 
-    // Hide suggested posts from feed
-    if (window.isDesktopMode()) {
-      (() => {
-        const containerSelector = '.x1yztbdb.x1n2onr6.xh8yej3.x1ja2u2z';
-        const targetSpanSelector = 'span.xzsf02u.xo1l8bm.xdwrcjd';
+    const LABELS = new Set([
+        'Suggested for you', 'Follow', 'Join', 'Join group', 'Join now', 'Your group suggestions',
+        'Gợi ý cho bạn', 'Theo dõi', 'Tham gia', 'Tham gia nhóm', 'Nhóm gợi ý cho bạn',
+        'Sugerido para ti', 'Seguir', 'Unirte', 'Für dich vorgeschlagen', 'Folgen', 'Beitreten',
+        'Suggéré pour vous', 'Suivre', 'Rejoindre', 'Disarankan untuk Anda', 'Ikuti', 'Gabung',
+        'おすすめ', 'フォロー', '推荐', '关注', 'Önerilen', 'Takip Et', 'แนะนำสำหรับคุณ', 'ติดตาม'
+    ].map(window.normalizeFeedLabel));
 
-        const hideMatchingContainers = () => {
-          const containers = document.querySelectorAll(containerSelector);
-          containers.forEach(container => {
-            const targetSpan = container.querySelector(targetSpanSelector);
-            if (targetSpan) {
-              container.style.display = 'none';
-            }
-          });
-        };
+    // Only the header: a friend's post that merely says "Follow" in its text must stay
+    const HEADER_LABELS = 12;
 
-        hideMatchingContainers();
-
-        const observer = new MutationObserver(() => {
-          hideMatchingContainers();
-        });
-
-        observer.observe(document.body, {
-          childList: true,
-          subtree: true,
-        });
-      })();
-    } else {
-      (function() {
-        function processNode(node) {
-          if (!(node instanceof HTMLElement)) return;
-          if (window.location.pathname !== '/') return;
-
-          const textSpans = node.querySelectorAll(
-            'div[data-mcomponent="TextArea"][data-type="text"][data-tti-phase="-1"] .native-text > span'
-          );
-
-          textSpans.forEach(textSpan => {
-            if (textSpan.textContent.trim() === '•') {
-              const suggestedPostContainer = textSpan.closest('div[data-tracking-duration-id]');
-              if (suggestedPostContainer) {
-                suggestedPostContainer.style.display = 'none';
-                const postGap = suggestedPostContainer.previousElementSibling;
-                if (postGap) {
-                  postGap.style.display = 'none';
-                }
-              }
-            }
-          });
-        }
-
-        const observer = new MutationObserver(mutations => {
-          for (const mutation of mutations) {
-            for (const node of mutation.addedNodes) {
-              processNode(node);
-            }
-          }
-        });
-
-        observer.observe(document.body, {
-          childList: true,
-          subtree: true
-        });
-
-        processNode(document.body);
-      })();
-    }
+    window.addFeedFilter((unit, labels) =>
+        location.pathname === '/' &&
+        labels.slice(0, HEADER_LABELS).some(text => LABELS.has(text))
+    );
 })();
-

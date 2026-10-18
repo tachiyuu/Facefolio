@@ -2,7 +2,6 @@ package com.eepiemi.materialbook.utils
 
 import java.net.URL
 import java.net.URLDecoder
-import java.net.URLEncoder
 
 fun fbRedirectSanitizer(link: String): String {
     try {
@@ -16,12 +15,11 @@ fun fbRedirectSanitizer(link: String): String {
             url = URL(params["u"] ?: return link)
         }
 
+        // Filter out fbclid but do NOT re-encode the values
+        // Re-encoding causes double-encoding when the URL is shared via Intent
         val params = url.query?.split("&")
             ?.filter { !it.startsWith("fbclid=") }
-            ?.joinToString("&") { param ->
-                val (key, value) = param.split("=", limit = 2)
-                "$key=${URLEncoder.encode(value, "UTF-8")}"
-            }
+            ?.joinToString("&")
 
         return buildString {
             append("${url.protocol}://${url.host}")

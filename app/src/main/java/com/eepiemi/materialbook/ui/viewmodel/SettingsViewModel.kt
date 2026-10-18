@@ -80,7 +80,7 @@ class SettingsViewModel(
     )
     val hideSuggested = dataStore.hideSuggested.stateIn(
         scope = viewModelScope,
-        initialValue = initialPrefs[HIDE_SUGGESTED] ?: false,
+        initialValue = initialPrefs[HIDE_SUGGESTED] ?: true,
         started = SharingStarted.WhileSubscribed()
     )
     val hideReels = dataStore.hideReels.stateIn(
@@ -95,7 +95,7 @@ class SettingsViewModel(
     )
     val hidePeopleYouMayKnow = dataStore.hidePeopleYouMayKnow.stateIn(
         scope = viewModelScope,
-        initialValue = initialPrefs[HIDE_PEOPLE_YOU_MAY_KNOW] ?: false,
+        initialValue = initialPrefs[HIDE_PEOPLE_YOU_MAY_KNOW] ?: true,
         started = SharingStarted.WhileSubscribed()
     )
     val hideGroups = dataStore.hideGroups.stateIn(

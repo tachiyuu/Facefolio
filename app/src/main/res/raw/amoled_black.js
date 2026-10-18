@@ -135,6 +135,43 @@
       ._al7j ._al66, ._9nqb { background-color: #242424; }
       .sp_M-AstDWg75z_3x { filter: invert(1) }
 
+      /* Fix #41: Ensure text is visible in input fields, textareas, and contenteditable elements */
+      input, textarea, [contenteditable="true"], [contenteditable=""],
+      [role="textbox"], [data-editor], [data-contents],
+      div[contenteditable] span, div[contenteditable] p,
+      div[contenteditable] div {
+        color: #e4e6eb !important;
+        caret-color: #e4e6eb !important;
+        -webkit-text-fill-color: #e4e6eb !important;
+      }
+
+      /* Fix text in post composer */
+      [data-mcomponent="TextArea"] input,
+      [data-mcomponent="TextArea"] textarea,
+      [data-mcomponent="TextArea"] [contenteditable],
+      [data-mcomponent="TextArea"] span,
+      div[role="textbox"] span,
+      div[role="textbox"] br + span,
+      form input, form textarea {
+        color: #e4e6eb !important;
+        caret-color: #e4e6eb !important;
+        -webkit-text-fill-color: #e4e6eb !important;
+      }
+
+      /* Fix placeholder text visibility */
+      input::placeholder, textarea::placeholder,
+      [contenteditable]::before {
+        color: #b0b3b8 !important;
+        -webkit-text-fill-color: #b0b3b8 !important;
+      }
+
+      /* Fix saved profiles / login page text visibility */
+      [data-bloks-name="bk.components.TextInput"] input,
+      [data-bloks-name="bk.components.TextInput"] span {
+        color: #e4e6eb !important;
+        -webkit-text-fill-color: #e4e6eb !important;
+      }
+
       :root, .__fb-light-mode:root, .__fb-light-mode {
         --card-background: #121212;
         --primary-text: #fff;

@@ -9,10 +9,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -65,11 +69,7 @@ fun SettingsItem(
             }
         }
         if (item.isActive != null) {
-            Switch(
-                checked = item.isActive,
-                onCheckedChange = { item.onClick() },
-                modifier = Modifier
-            )
+            SettingsSwitch(checked = item.isActive, onCheckedChange = { item.onClick() })
         } else {
             Icon(
                 imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
@@ -80,6 +80,22 @@ fun SettingsItem(
     }
 }
 
+
+// A check / cross in the thumb makes the on and off states readable at a glance
+@Composable
+fun SettingsSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    Switch(
+        checked = checked,
+        onCheckedChange = onCheckedChange,
+        thumbContent = {
+            Icon(
+                imageVector = if (checked) Icons.Default.Check else Icons.Default.Close,
+                contentDescription = null,
+                modifier = Modifier.size(SwitchDefaults.IconSize)
+            )
+        }
+    )
+}
 
 @Composable
 fun SettingsGroup(

@@ -29,7 +29,6 @@ import androidx.compose.material.icons.outlined.Pinch
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -41,10 +40,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -199,63 +198,47 @@ private fun HideOptionsDialog(
     val hidePeopleYouMayKnow = viewModel.hidePeopleYouMayKnow.collectAsState()
     val hideGroups = viewModel.hideGroups.collectAsState()
 
+    // Switches here mean "shown in feed": on = visible, off = hidden (stored settings are "hide X")
     Dialog(
         onDismissRequest = { onDismiss() }
     ) {
 
         Column(
             modifier = Modifier
-                .clip(RoundedCornerShape(24.dp))
+                .clip(RoundedCornerShape(28.dp))
                 .background(color = MaterialTheme.colorScheme.surfaceContainer)
-                .padding(vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(vertical = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-
-            HideDialogItem(
-                SettingsItem(
-                    icon = Icons.Filled.Try,
-                    title = stringResource(R.string.suggested_posts),
-                    isActive = hideSuggested.value,
-                    onClick = { viewModel.setHideSuggested(!hideSuggested.value) }
-                )
+            Text(
+                text = stringResource(R.string.show_in_feed_title),
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(horizontal = 24.dp)
+            )
+            Text(
+                text = stringResource(R.string.show_in_feed_hint),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 12.dp)
             )
 
-            HideDialogItem(
-                SettingsItem(
-                    icon = Icons.Filled.Camera,
-                    title = stringResource(R.string.reels),
-                    isActive = hideReels.value,
-                    onClick = { viewModel.setHideReels(!hideReels.value) }
-                )
-            )
-
-            HideDialogItem(
-                SettingsItem(
-                    icon = Icons.Filled.BurstMode,
-                    title = stringResource(R.string.stories),
-                    isActive = hideStories.value,
-                    onClick = { viewModel.setHideStories(!hideStories.value) }
-                )
-            )
-
+            FeedItemToggle(Icons.Filled.Try, stringResource(R.string.suggested_posts), hideSuggested.value) {
+                viewModel.setHideSuggested(!hideSuggested.value)
+            }
+            FeedItemToggle(Icons.Filled.EmojiPeople, stringResource(R.string.people_you_may_know), hidePeopleYouMayKnow.value) {
+                viewModel.setHidePeopleYouMayKnow(!hidePeopleYouMayKnow.value)
+            }
+            FeedItemToggle(Icons.Filled.Camera, stringResource(R.string.reels), hideReels.value) {
+                viewModel.setHideReels(!hideReels.value)
+            }
+            FeedItemToggle(Icons.Filled.BurstMode, stringResource(R.string.stories), hideStories.value) {
+                viewModel.setHideStories(!hideStories.value)
+            }
             if (!viewModel.desktopLayout.collectAsState().value) {
-                HideDialogItem(
-                    SettingsItem(
-                        icon = Icons.Filled.EmojiPeople,
-                        title = stringResource(R.string.people_you_may_know),
-                        isActive = hidePeopleYouMayKnow.value,
-                        onClick = { viewModel.setHidePeopleYouMayKnow(!hidePeopleYouMayKnow.value) }
-                    )
-                )
-
-                HideDialogItem(
-                    SettingsItem(
-                        icon = Icons.Filled.Diversity1,
-                        title = stringResource(R.string.groups),
-                        isActive = hideGroups.value,
-                        onClick = { viewModel.setHideGroups(!hideGroups.value) }
-                    )
-                )
+                FeedItemToggle(Icons.Filled.Diversity1, stringResource(R.string.groups), hideGroups.value) {
+                    viewModel.setHideGroups(!hideGroups.value)
+                }
             }
         }
     }
@@ -263,38 +246,41 @@ private fun HideOptionsDialog(
 }
 
 @Composable
-private fun HideDialogItem(item: SettingsItem) {
+private fun FeedItemToggle(
+    icon: ImageVector,
+    title: String,
+    isHidden: Boolean,
+    onToggle: () -> Unit
+) {
+    val shown = !isHidden
     Row(
         modifier = Modifier
-            .clip(MaterialTheme.shapes.large)
-            .clickable { item.onClick() }
+            .clickable { onToggle() }
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 24.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Icon(
-            item.icon,
+            icon,
             contentDescription = null,
-            modifier = Modifier.size(28.dp),
-            tint = MaterialTheme.colorScheme.onBackground.copy(0.6F)
+            modifier = Modifier.size(24.dp),
+            tint = if (shown) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.outline
         )
 
-        Text(
-            text = item.title,
-            color = MaterialTheme.colorScheme.onBackground.copy(0.6F),
-            fontSize = 18.sp,
-            modifier = Modifier
-                .padding(start = 16.dp)
-                .weight(1F)
-        )
-
-        item.isActive?.let {
-            Switch(
-                checked = item.isActive,
-                onCheckedChange = { item.onClick() },
-                modifier = Modifier
+        Column(Modifier.weight(1F)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                color = if (shown) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.outline
+            )
+            Text(
+                text = stringResource(if (shown) R.string.state_shown else R.string.state_hidden),
+                style = MaterialTheme.typography.bodySmall,
+                color = if (shown) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
             )
         }
+
+        SettingsSwitch(checked = shown, onCheckedChange = { onToggle() })
     }
 }

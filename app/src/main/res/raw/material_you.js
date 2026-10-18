@@ -140,15 +140,31 @@
       .revamped-progress-bar-color .loading-bar-animation { background: ${MATERIALYOU_PRIMARY}; }
       .pull-to-refresh-spinner-icon { color: ${MATERIALYOU_ONPRIMARY}; }
 
-      :root, .__fb-light-mode:root, .__fb-light-mode {
-        --primary-button-background: ${MATERIALYOU_PRIMARY};
-        --blue-link: ${MATERIALYOU_PRIMARY};
-        --focus-ring-blue: ${MATERIALYOU_PRIMARY};
-        --accent: ${MATERIALYOU_PRIMARY};
-        --primary-deemphasized-button-text: ${MATERIALYOU_PRIMARY};
-        --highlight-bg: rgba(${MATERIALYOU_PRIMARY_RGB.r}, ${MATERIALYOU_PRIMARY_RGB.g}, ${MATERIALYOU_PRIMARY_RGB.b}, 0.2);
-        --primary-deemphasized-button-background: rgba(${MATERIALYOU_PRIMARY_RGB.r}, ${MATERIALYOU_PRIMARY_RGB.g}, ${MATERIALYOU_PRIMARY_RGB.b}, 0.2);
-        --primary-deemphasized-button-pressed-overlay: rgba(${MATERIALYOU_PRIMARY_RGB.r}, ${MATERIALYOU_PRIMARY_RGB.g}, ${MATERIALYOU_PRIMARY_RGB.b}, 0.15);
+      :root, .__fb-light-mode:root, .__fb-light-mode, .__fb-dark-mode:root, .__fb-dark-mode {
+        --primary-button-background: ${MATERIALYOU_PRIMARY} !important;
+        --blue-link: ${MATERIALYOU_PRIMARY} !important;
+        --focus-ring-blue: ${MATERIALYOU_PRIMARY} !important;
+        --accent: ${MATERIALYOU_PRIMARY} !important;
+        --primary-icon: ${MATERIALYOU_PRIMARY} !important;
+        --primary-deemphasized-button-text: ${MATERIALYOU_PRIMARY} !important;
+        --highlight-bg: rgba(${MATERIALYOU_PRIMARY_RGB.r}, ${MATERIALYOU_PRIMARY_RGB.g}, ${MATERIALYOU_PRIMARY_RGB.b}, 0.2) !important;
+        --primary-deemphasized-button-background: rgba(${MATERIALYOU_PRIMARY_RGB.r}, ${MATERIALYOU_PRIMARY_RGB.g}, ${MATERIALYOU_PRIMARY_RGB.b}, 0.2) !important;
+        --primary-deemphasized-button-pressed-overlay: rgba(${MATERIALYOU_PRIMARY_RGB.r}, ${MATERIALYOU_PRIMARY_RGB.g}, ${MATERIALYOU_PRIMARY_RGB.b}, 0.15) !important;
+      }
+
+      /* Tint mobile Facebook logo and active navigation tabs */
+      svg path[fill="#0866FF"], svg path[fill="#1877F2"], [fill="#1877f2"], [fill="#0866ff"] {
+        fill: ${MATERIALYOU_PRIMARY} !important;
+      }
+      div[role="tab"][aria-selected="true"] svg, div[role="tab"][aria-selected="true"] path {
+        fill: ${MATERIALYOU_PRIMARY} !important;
+      }
+      div[role="tab"][aria-selected="true"] {
+        border-bottom-color: ${MATERIALYOU_PRIMARY} !important;
+      }
+      /* Tint buttons and interactive links */
+      [data-mcomponent="MContainer"] [role="button"][style*="background"] {
+        border-color: ${MATERIALYOU_PRIMARY} !important;
       }
     `;
     document.head.appendChild(style);

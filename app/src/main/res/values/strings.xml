@@ -29,6 +29,10 @@
     <string name="stories">Stories</string>
     <string name="people_you_may_know">People you may know</string>
     <string name="groups">Groups</string>
+    <string name="show_in_feed_title">Show in feed</string>
+    <string name="show_in_feed_hint">Turn off what you don\'t want to see</string>
+    <string name="state_shown">Shown</string>
+    <string name="state_hidden">Hidden</string>
     <string name="enable_material_you_theming_for_facebook">Enable Material You theming for Facebook</string>
     <string name="enable_pure_black_theme_for_amoled_displays">Enable pure black theme. Needs \'Dark mode\' to work</string>
     <string name="keep_the_navigation_bar_visible_while_scrolling">Keep the navigation bar visible while scrolling</string>

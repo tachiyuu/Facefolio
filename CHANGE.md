@@ -1,3 +1,7 @@
+## Materialbook - v1.1.4
+
+* Fix: the automatic desktop layout (used in landscape and on large screens) never switched back to the mobile layout. Once the app had been opened in landscape, it stayed in desktop layout. It now switches back, also when the phone is rotated while the app is open.
+
 ## Materialbook - v1.1.3
 
 * The app has its own package name, `com.tachiyuu.materialbook`. It installs as a separate app from the original, so you need to log in again and re-select your settings.

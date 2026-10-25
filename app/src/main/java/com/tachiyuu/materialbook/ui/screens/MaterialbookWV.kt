@@ -123,15 +123,24 @@ fun MaterialbookWebView(
     val isAutoRevert by settingsVM.isRevertDesktop.collectAsState()
     val isAutoDesktop = rememberAutoDesktop()
 
-    LaunchedEffect(Unit) {
-        if (isAutoDesktop && !isDesktop) {
-            settingsVM.setRevertDesktop(true)
-            settingsVM.setDesktopLayout(true)
+    // Automatic desktop layout in landscape / on large screens, switched back afterwards. Re-run on
+    // rotation; after start-up the page is already loaded, so it reloads with the new user agent.
+    var autoDesktopChecked by remember { mutableStateOf(false) }
+    LaunchedEffect(isAutoDesktop) {
+        val desktop = when {
+            isAutoDesktop && !isDesktop -> true
+            !isAutoDesktop && isAutoRevert -> false
+            else -> null
         }
-        else if (!isAutoDesktop && isAutoRevert) {
-            settingsVM.setRevertDesktop(false)
-            settingsVM.setDesktopLayout(false)
+        if (desktop != null) {
+            settingsVM.setRevertDesktop(desktop)
+            settingsVM.setDesktopLayout(desktop)
+            if (autoDesktopChecked) {
+                state.nativeWebView.settings.userAgentString = if (desktop) DESKTOP_USER_AGENT else ""
+                navigator.reload()
+            }
         }
+        autoDesktopChecked = true
     }
 
     var isLoading by rememberSaveable { mutableStateOf(true) }

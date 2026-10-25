@@ -134,9 +134,11 @@ class SettingsViewModel(
         initialValue = initialPrefs[PINNED_TABS] ?: DEFAULT_PINNED_TABS,
         started = SharingStarted.WhileSubscribed()
     )
+    // Seeded from the stored value like the others: with a hard-coded false the app never switched
+    // back from the automatic desktop layout, because the check runs once with this initial value
     val isRevertDesktop = dataStore.revertDesktop.stateIn(
         scope = viewModelScope,
-        initialValue = false,
+        initialValue = initialPrefs[SettingsDataStore.isRevertDesktop] ?: false,
         started = SharingStarted.WhileSubscribed()
     )
 

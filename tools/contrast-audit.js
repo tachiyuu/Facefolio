@@ -164,8 +164,9 @@ run(async cdp => {
         for (let s = 0; s < opts.screens; s++) {
             if (s) {
                 const scroll = () => cdp.evaluate(() => { const y = scrollY; scrollBy(0, Math.round(innerHeight * 0.9)); return scrollY !== y; });
+                // At the bottom Facebook loads more posts, which takes a few seconds
                 let moved = await scroll();
-                if (!moved) { await sleep(2000); moved = await scroll(); } // more content may still be loading
+                for (let retry = 0; !moved && retry < 5; retry++) { await sleep(1500); moved = await scroll(); }
                 if (!moved) break;
                 await sleep(1200);
             }
@@ -176,7 +177,9 @@ run(async cdp => {
         const all = [...results.values()].filter(r => !r.skipped);
         const fails = all.filter(r => !r.ok);
         const count = kind => `${all.filter(r => r.kind === kind).length} ${kind}s (${fails.filter(r => r.kind === kind).length} failing)`;
-        console.log(`${name.padEnd(14)} ${count('text')}, ${count('icon')}, ${skipped} over images (not measured)`);
+        // Facebook has been seen serving the other theme on some loads, so say which one each page got
+        const pageTheme = await cdp.evaluate(() => document.documentElement.getAttribute('data-mb-theme'));
+        console.log(`${name.padEnd(14)} [${pageTheme}] ${count('text')}, ${count('icon')}, ${skipped} over images (not measured)`);
         if (fails.length) failedPages++;
 
         // Same colours on the same kind of element are one problem

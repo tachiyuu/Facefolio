@@ -117,26 +117,29 @@ function scanViewport() {
             key: `${Math.round(r.left + scrollX)},${Math.round(r.top + scrollY)},${sample.slice(0, 10)}` });
     };
 
-    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-    const seen = new Set();
-    for (let node; (node = walker.nextNode());) {
-        const text = node.textContent.trim();
-        const el = node.parentElement;
-        if (!text || !el || seen.has(el) || el.closest('script, style, noscript')) continue;
-        seen.add(el);
-        if (parseFloat(getComputedStyle(el).fontSize) < 6) continue;
-        check(el, getComputedStyle(el).color, ICON.test(text) ? 'icon' : 'text', text);
-    }
-    document.querySelectorAll('svg').forEach(svg => {
-        const shape = [...svg.querySelectorAll('path, circle, rect, ellipse, polygon, use')].find(s => {
-            const st = getComputedStyle(s);
-            return st.fill !== 'none' || st.stroke !== 'none';
+    try {
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+        const seen = new Set();
+        for (let node; (node = walker.nextNode());) {
+            const text = node.textContent.trim();
+            const el = node.parentElement;
+            if (!text || !el || seen.has(el) || el.closest('script, style, noscript')) continue;
+            seen.add(el);
+            if (parseFloat(getComputedStyle(el).fontSize) < 6) continue;
+            check(el, getComputedStyle(el).color, ICON.test(text) ? 'icon' : 'text', text);
+        }
+        document.querySelectorAll('svg').forEach(svg => {
+            const shape = [...svg.querySelectorAll('path, circle, rect, ellipse, polygon, use')].find(s => {
+                const st = getComputedStyle(s);
+                return st.fill !== 'none' || st.stroke !== 'none';
+            });
+            if (!shape) return;
+            const st = getComputedStyle(shape);
+            check(svg, st.fill !== 'none' && !st.fill.startsWith('url') ? st.fill : st.stroke, 'icon', '<svg>');
         });
-        if (!shape) return;
-        const st = getComputedStyle(shape);
-        check(svg, st.fill !== 'none' && !st.fill.startsWith('url') ? st.fill : st.stroke, 'icon', '<svg>');
-    });
-    hitAll.remove();
+    } finally {
+        hitAll.remove(); // never leave the page with every element clickable
+    }
     return results;
 }
 

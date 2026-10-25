@@ -658,7 +658,11 @@ window.onDomChange(() => {
 // to console.warn. window.__mbHealth.run() re-checks on demand (tools/feed-audit.js reads it).
 (() => {
     const FB = window.__mbFB;
-    const CHECKS = {
+    const CHECKS = window.isDesktopMode() ? {
+        headerActions: () => !!document.querySelector(FB.desktop.headerActions),
+        stickyBanner: () => !!document.querySelector(`div[role="banner"].${FB.desktop.stickyBanner}, div[role="banner"] .${FB.desktop.stickyBanner}`),
+        actionBar: () => !!document.querySelector(FB.desktop.actionBar),
+    } : {
         feedItems: () => document.querySelectorAll(FB.feedItem).length > 1,
         headerTabs: () => (document.querySelector(FB.tablist)?.querySelectorAll(`:scope > ${FB.tab}`).length ?? 0) >= 2,
         themeColor: () => !!document.querySelector(FB.themeColor)?.getAttribute('content'),
@@ -675,23 +679,29 @@ window.onDomChange(() => {
         health.failures = Object.keys(CHECKS).filter(name => !health.checks[name]);
         return health;
     };
+    const loginScreen = () => document.getElementsByClassName('wbloks_1').length > 0 || !!document.querySelector('input[name="pass"]');
     const finish = () => {
+        if (loginScreen()) { health.status = 'skipped'; return; } // logged out, rendered after the start
         health.status = health.failures.length ? 'failed' : 'ok';
         health.checkedAt = new Date().toISOString();
         if (health.failures.length)
             console.warn('[Materialbook] Facebook hooks not found, features may not work:', health.failures.join(', '));
     };
 
-    // Only the logged-in mobile home feed has all hooks; the login screen is built with bloks UI
-    if (window.isDesktopMode() || location.pathname !== '/' || document.getElementsByClassName('wbloks_1').length) {
+    // Only the logged-in home feed has all hooks; the login screen is built with bloks UI
+    if (location.pathname !== '/' || loginScreen()) {
         health.status = 'skipped';
         return;
     }
 
+    // isFeed() scans every button (mobile), so while loading check at most twice a second
     const started = Date.now();
+    let last = 0;
     window.onDomChange(() => {
-        if (health.status !== 'pending') return;
-        if (!evaluate().failures.length || Date.now() - started > TIMEOUT) finish();
+        const now = Date.now();
+        if (health.status !== 'pending' || now - last < 500) return;
+        last = now;
+        if (!evaluate().failures.length || now - started > TIMEOUT) finish();
     });
     // The DOM may go quiet before the timeout; make sure it settles anyway
     setTimeout(() => { if (health.status === 'pending') { evaluate(); finish(); } }, TIMEOUT + 500);

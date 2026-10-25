@@ -1,6 +1,7 @@
 package com.eepiemi.materialbook
 
 import android.os.Bundle
+import android.webkit.CookieManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -23,5 +24,12 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
+    }
+
+    // WebView writes cookies to disk lazily; save them before the app may be killed so settings
+    // stored in cookies (Facebook's dark mode, language) and fresh sign-ins survive
+    override fun onPause() {
+        super.onPause()
+        CookieManager.getInstance().flush()
     }
 }

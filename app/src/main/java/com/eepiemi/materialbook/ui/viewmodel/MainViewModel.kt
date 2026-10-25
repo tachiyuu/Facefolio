@@ -58,8 +58,12 @@ class MainViewModel(
             Script(true, R.raw.feed_pill, "feed_pill.js") // shows itself only once the feed filter hid something
         )
 
+        // Settings the scripts read directly
+        val pinnedTabs = settings.pinnedTabs.value.joinToString(",") { "\"$it\"" }
+        val config = "window.__mbPinnedTabs = [$pinnedTabs];\n"
+
         viewModelScope.launch {
-            _scripts.value =
+            _scripts.value = config +
                 fetchScripts(
                     scripts = scripts,
                     fallbackContent = { resId ->

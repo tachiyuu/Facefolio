@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.EmojiPeople
 import androidx.compose.material.icons.filled.Padding
 import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material.icons.filled.Try
+import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.DesktopWindows
@@ -28,6 +29,7 @@ import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.PanoramaWideAngle
 import androidx.compose.material.icons.outlined.Pinch
+import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Icon
@@ -51,6 +53,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.eepiemi.materialbook.R
+import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.PINNABLE_TABS
 import com.eepiemi.materialbook.ui.viewmodel.SettingsViewModel
 import com.eepiemi.materialbook.utils.rememberAutoDesktop
 
@@ -87,6 +90,12 @@ fun SettingsContent(
         viewModel.hideGroups.collectAsState().value to R.string.groups,
     ).filter { it.first }.map { stringResource(it.second).lowercase() }
 
+    var isPinnedTabsOpen by rememberSaveable { mutableStateOf(false) }
+    val pinnedTabs = viewModel.pinnedTabs.collectAsState().value
+    val pinnedSummary = (listOf(R.string.tab_home) + PINNABLE_TABS.filter { it in pinnedTabs }.map { tabName(it) })
+        .map { stringResource(it) }
+        .joinToString(", ")
+
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -108,6 +117,13 @@ fun SettingsContent(
                         else stringResource(R.string.show_in_feed_hidden_summary, hiddenInFeed.joinToString(", ")),
                     isActive = null,
                     onClick = { isOpenDialog = true },
+                ),
+                SettingsItem(
+                    icon = Icons.Outlined.PushPin,
+                    title = stringResource(R.string.pinned_tabs_title),
+                    supportingText = pinnedSummary,
+                    isActive = null,
+                    onClick = { isPinnedTabsOpen = true },
                 )
             )
         )
@@ -229,6 +245,67 @@ fun SettingsContent(
         )
     }
 
+    if (isPinnedTabsOpen) {
+        Dialog(onDismissRequest = {
+            @Suppress("AssignedValueIsNeverRead")
+            isPinnedTabsOpen = false
+        }) {
+            ToggleDialogContent(
+                title = stringResource(R.string.pinned_tabs_title),
+                hint = stringResource(R.string.pinned_tabs_hint)
+            ) {
+                PINNABLE_TABS.forEach { tab ->
+                    FeedItemToggle(tabIcon(tab), stringResource(tabName(tab)), tab !in pinnedTabs) {
+                        viewModel.togglePinnedTab(tab)
+                    }
+                }
+            }
+        }
+    }
+
+}
+
+private fun tabName(tab: String) = when (tab) {
+    "groups" -> R.string.groups
+    "notifications" -> R.string.tab_notifications
+    "friends" -> R.string.tab_friends
+    "messages" -> R.string.tab_messages
+    "reels" -> R.string.reels
+    else -> R.string.marketplace
+}
+
+private fun tabIcon(tab: String) = when (tab) {
+    "groups" -> Icons.Filled.Diversity1
+    "notifications" -> Icons.Outlined.NotificationsNone
+    "friends" -> Icons.Filled.EmojiPeople
+    "messages" -> Icons.Outlined.ChatBubbleOutline
+    "reels" -> Icons.Filled.Camera
+    else -> Icons.Filled.Storefront
+}
+
+@Composable
+private fun ToggleDialogContent(title: String, hint: String, rows: @Composable () -> Unit) {
+    Column(
+        modifier = Modifier
+            .clip(RoundedCornerShape(28.dp))
+            .background(color = MaterialTheme.colorScheme.surfaceContainer)
+            .padding(vertical = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(horizontal = 24.dp)
+        )
+        Text(
+            text = hint,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 12.dp)
+        )
+        rows()
+    }
 }
 
 @Composable
@@ -249,26 +326,10 @@ private fun HideOptionsDialog(
         onDismissRequest = { onDismiss() }
     ) {
 
-        Column(
-            modifier = Modifier
-                .clip(RoundedCornerShape(28.dp))
-                .background(color = MaterialTheme.colorScheme.surfaceContainer)
-                .padding(vertical = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ToggleDialogContent(
+            title = stringResource(R.string.show_in_feed_title),
+            hint = stringResource(R.string.show_in_feed_hint)
         ) {
-            Text(
-                text = stringResource(R.string.show_in_feed_title),
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(horizontal = 24.dp)
-            )
-            Text(
-                text = stringResource(R.string.show_in_feed_hint),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 12.dp)
-            )
-
             FeedItemToggle(Icons.Filled.Try, stringResource(R.string.suggested_posts), hideSuggested.value) {
                 viewModel.setHideSuggested(!hideSuggested.value)
             }

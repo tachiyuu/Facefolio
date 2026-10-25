@@ -1,7 +1,9 @@
 package com.eepiemi.materialbook.ui.theme
 
+import android.content.Context
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -20,23 +22,24 @@ private val LightColorScheme = lightColorScheme(
     secondary = Color.LightGray
 )
 
+// Also used outside Compose theming: Facebook's own light/dark theme is independent of the system
+// one, so the injected scripts get both palettes and pick the one matching the page.
+fun materialbookColorScheme(context: Context, darkTheme: Boolean, dynamicColor: Boolean = true): ColorScheme =
+    when {
+        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->
+            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        darkTheme -> DarkColorScheme
+        else -> LightColorScheme
+    }
+
 @Composable
 fun MaterialbookTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
-
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = materialbookColorScheme(LocalContext.current, darkTheme, dynamicColor),
         typography = Typography,
         content = content
     )

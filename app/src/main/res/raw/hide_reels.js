@@ -26,8 +26,5 @@
     window.addFeedFilter(unit =>
       [...unit.querySelectorAll('.fl.ac .native-text')].some(el => ICONS.includes(el.textContent.trim()))
     );
-
-    window.hideHeaderTab('reels', ICONS[0]);
-    window.hideHeaderTab('video', ICONS[1]);
   }
 })();

@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.map
 
@@ -29,6 +30,10 @@ class SettingsDataStore(private val context: Context) {
         val HIDE_MARKETPLACE = booleanPreferencesKey("hide_marketplace")
         val HIDE_COUNTS = booleanPreferencesKey("hide_counts")
         val QUIET_BADGES = booleanPreferencesKey("quiet_badges")
+        val PINNED_TABS = stringSetPreferencesKey("pinned_tabs")
+        // Header tabs besides Home, keyed as in scripts.js; Groups is a tab the app adds
+        val PINNABLE_TABS = listOf("groups", "notifications", "friends", "messages", "reels", "marketplace")
+        val DEFAULT_PINNED_TABS = setOf("groups", "notifications")
         val isRevertDesktop = booleanPreferencesKey("is_revert_desktop")
     }
 
@@ -122,5 +127,10 @@ class SettingsDataStore(private val context: Context) {
     val quietBadges = context.dataStore.data.map { it[QUIET_BADGES] ?: false }
     suspend fun setQuietBadges(quietBadges: Boolean) {
         context.dataStore.edit { it[QUIET_BADGES] = quietBadges }
+    }
+
+    val pinnedTabs = context.dataStore.data.map { it[PINNED_TABS] ?: DEFAULT_PINNED_TABS }
+    suspend fun setPinnedTabs(pinnedTabs: Set<String>) {
+        context.dataStore.edit { it[PINNED_TABS] = pinnedTabs }
     }
 }

@@ -6,6 +6,12 @@
     }
 })();
 
+// Facebook's own theme (set in the account, independent of the system): its light theme uses a white theme-color
+(() => {
+    window.isFacebookDark = () =>
+        document.querySelector('meta[name="theme-color"]')?.getAttribute('content')?.toLowerCase().trim() !== '#ffffff';
+})();
+
 // Feed identifier
 (() => {
     window.isFeed = () => {
@@ -130,49 +136,95 @@
 })();
 
 
-// Header tabs (mobile): hideHeaderTab(name, glyph) removes a tab such as reels or marketplace.
-// Facebook places each tab at a fixed x offset, so the remaining ones are spread out again.
+// Header tabs (mobile): only Home plus the tabs pinned in settings (window.__mbPinnedTabs, set by the
+// app), and an optional Groups tab. Facebook stacks its tabs with negative margins and fixed x offsets
+// that it rewrites at any time, so the layout is plain CSS flex with !important instead of JS math:
+// it never depends on when the bar was measured and survives every inline style rewrite.
 (() => {
-    const hidden = [];
+    if (window.isDesktopMode()) return;
+
+    const ORDER = ['feed', 'friends', 'messages', 'reels', 'notifications', 'marketplace'];
+    const ALIASES = { home: 'feed', messenger: 'messages', chats: 'messages', video: 'reels', watch: 'reels' };
+    const pins = new Set(window.__mbPinnedTabs || ORDER.concat('groups'));
+    pins.add('feed');
+
+    const style = document.createElement('style');
+    // Tabs keep their own width (their content is laid out inside it); only the row is ours.
+    // Facebook's .m containers are column flexboxes, hence the explicit direction. Other children
+    // of the bar (the "‹ Notifications" title row on some pages) wrap below at full width, as before.
+    style.textContent = `
+        div[role="tablist"]:has(> div[role="tab"]) {
+            display: flex !important; flex-direction: row !important; flex-wrap: wrap !important;
+            justify-content: space-around !important; align-items: flex-start !important;
+        }
+        div[role="tablist"] > div[role="tab"], #mb-groups-tab { flex: 0 0 auto !important; margin: 0 !important; }
+        div[role="tablist"] > :not([role="tab"]):not(#mb-groups-tab) { flex: 0 0 100% !important; }
+        div[role="tablist"] > [data-mb-unpinned] { display: none !important; }
+        #mb-groups-tab {
+            width: 69px; height: 48px; display: flex; align-items: center; justify-content: center;
+            pointer-events: auto !important; /* the bar is pointer-events: none, its tabs opt back in */
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Tabs paint their background with a ::before; the gaps between them need the same colour
     const barStyle = document.createElement('style');
     document.head.appendChild(barStyle);
 
-    function relayout() {
+    // English labels name the tab ("feed, 1 of 6"); other languages fall back to Facebook's fixed order
+    const keyOf = (tab, i, count) => {
+        const word = (tab.getAttribute('aria-label') || '').split(/[\s,]/)[0].toLowerCase();
+        const key = ALIASES[word] || word;
+        return ORDER.includes(key) ? key : (count === ORDER.length ? ORDER[i] : null);
+    };
+
+    function groupsTab(color) {
+        const a = document.createElement('a');
+        a.id = 'mb-groups-tab';
+        a.href = '/groups_browse/your_groups/'; // plain /groups/ renders an empty page on m.facebook.com
+        a.setAttribute('aria-label', 'Groups');
+        // Facebook's page-level click handling swallows plain links in the header
+        a.addEventListener('click', e => {
+            e.preventDefault();
+            e.stopPropagation();
+            location.assign(a.href);
+        });
+        a.innerHTML = `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3"></circle><circle cx="5.5" cy="10" r="2.2"></circle><circle cx="18.5" cy="10" r="2.2"></circle><path d="M6.5 19c.5-3 2.7-4.8 5.5-4.8s5 1.8 5.5 4.8"></path><path d="M2 18c.3-2 1.6-3.4 3.4-3.6M22 18c-.3-2-1.6-3.4-3.4-3.6"></path></svg>`;
+        return a;
+    }
+
+    function apply() {
         const tablist = document.querySelector('div[role="tablist"]');
         if (!tablist) return;
-        const tabs = [...tablist.querySelectorAll('div[role="tab"]')];
-        const visible = tabs.filter(tab => {
-            const label = (tab.getAttribute('aria-label') || '').toLowerCase();
-            const text = tab.textContent;
-            const hide = hidden.some(([name, glyph]) => label.startsWith(name) || text.includes(glyph));
-            if (hide && tab.style.display !== 'none') tab.style.display = 'none';
-            return !hide;
+        const tabs = [...tablist.querySelectorAll(':scope > div[role="tab"]')];
+        tabs.forEach((tab, i) => {
+            const unpinned = !pins.has(keyOf(tab, i, tabs.length));
+            if (unpinned !== tab.hasAttribute('data-mb-unpinned')) tab.toggleAttribute('data-mb-unpinned', unpinned);
         });
-        if (!visible.length) return;
-        // Tabs no longer cover the whole bar, so give the bar the tabs' own background
-        // (painted by a ::before, like most of Facebook's mobile backgrounds). Facebook rewrites the
-        // bar's inline style, so this goes in a stylesheet.
-        const background = visible[0] && getComputedStyle(visible[0], '::before').backgroundColor;
-        const rule = background ? `div[role="tablist"] { background-color: ${background} !important; }` : '';
+
+        const background = tabs.length ? getComputedStyle(tabs[0], '::before').backgroundColor : '';
+        const rule = background && background !== 'rgba(0, 0, 0, 0)'
+            ? `div[role="tablist"]:has(> div[role="tab"]) { background-color: ${background} !important; }` : '';
         if (barStyle.textContent !== rule) barStyle.textContent = rule;
-        const slot = tablist.offsetWidth / visible.length;
-        visible.forEach((tab, i) => {
-            const left = Math.round(i * slot + (slot - tab.offsetWidth) / 2) + 'px';
-            if (tab.style.marginLeft !== left) tab.style.marginLeft = left;
-        });
+
+        if (pins.has('groups') && tabs.length && !document.getElementById('mb-groups-tab')) {
+            const plain = tabs.find(tab => tab.getAttribute('aria-selected') === 'false') || tabs[0];
+            const glyph = plain.querySelector('.native-text') || plain;
+            const tab = groupsTab(getComputedStyle(glyph).color);
+            // Match the thin line Facebook draws under every tab
+            const line = [...plain.children].find(child => child.offsetHeight === 2);
+            if (line) tab.style.borderBottom = `2px solid ${getComputedStyle(line).backgroundColor}`;
+            tabs[0].after(tab);
+        }
     }
 
     let scheduled = false;
     new MutationObserver(() => {
-        if (!hidden.length || scheduled) return;
+        if (scheduled) return;
         scheduled = true;
-        requestAnimationFrame(() => { scheduled = false; relayout(); });
+        requestAnimationFrame(() => { scheduled = false; apply(); });
     }).observe(document.body, { childList: true, subtree: true });
-
-    window.hideHeaderTab = (name, glyph) => {
-        hidden.push([name, glyph]);
-        relayout();
-    };
+    apply();
 })();
 
 

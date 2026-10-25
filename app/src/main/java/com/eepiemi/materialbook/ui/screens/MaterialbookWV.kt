@@ -38,6 +38,7 @@ import com.multiplatform.webview.web.rememberWebViewNavigator
 import com.eepiemi.materialbook.R
 import com.eepiemi.materialbook.ui.components.NetworkErrorDialog
 import com.eepiemi.materialbook.ui.components.settings.SettingsDialog
+import com.eepiemi.materialbook.ui.theme.materialbookColorScheme
 import com.eepiemi.materialbook.ui.viewmodel.MainViewModel
 import com.eepiemi.materialbook.ui.viewmodel.SettingsViewModel
 import com.eepiemi.materialbook.utils.DESKTOP_USER_AGENT
@@ -257,8 +258,8 @@ fun MaterialbookWebView(
     val barsInsets = WindowInsets.systemBars.asPaddingValues()
     val imeHeight = rememberImeHeight()
 
-    val primaryColor = colorScheme.primary.toArgb()
-    val onPrimaryColor  = colorScheme.onPrimary.toArgb()
+    val lightScheme = remember { materialbookColorScheme(context, darkTheme = false) }
+    val darkScheme = remember { materialbookColorScheme(context, darkTheme = true) }
 
     WebView(
         modifier = Modifier
@@ -315,7 +316,12 @@ fun MaterialbookWebView(
                     "ClipboardBridge"
                 )
                 addJavascriptInterface(
-                    MaterialYouBridge(primaryColor, onPrimaryColor),
+                    MaterialYouBridge(
+                        lightPrimary = lightScheme.primary.toArgb(),
+                        lightOnPrimary = lightScheme.onPrimary.toArgb(),
+                        darkPrimary = darkScheme.primary.toArgb(),
+                        darkOnPrimary = darkScheme.onPrimary.toArgb()
+                    ),
                     "MaterialYouBridge"
                 )
 

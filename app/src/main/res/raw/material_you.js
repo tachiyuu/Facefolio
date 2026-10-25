@@ -1,8 +1,10 @@
 (function() {
-  const MATERIALYOU_PRIMARY = window.MaterialYouBridge.getMaterialYouPrimaryRgbString();
-  const MATERIALYOU_ONPRIMARY = window.MaterialYouBridge.getMaterialYouOnPrimaryRgbString();
-  const MATERIALYOU_PRIMARY_RGB = JSON.parse(window.MaterialYouBridge.getMaterialYouPrimaryRgb());
-  const MATERIALYOU_ONPRIMARY_RGB  = JSON.parse(window.MaterialYouBridge.getMaterialYouOnPrimaryRgb());
+  // The palette matching Facebook's theme, not the system's: a light page needs the darker light-scheme tones
+  const DARK = window.isFacebookDark();
+  const MATERIALYOU_PRIMARY = window.MaterialYouBridge.getMaterialYouPrimaryRgbString(DARK);
+  const MATERIALYOU_ONPRIMARY = window.MaterialYouBridge.getMaterialYouOnPrimaryRgbString(DARK);
+  const MATERIALYOU_PRIMARY_RGB = JSON.parse(window.MaterialYouBridge.getMaterialYouPrimaryRgb(DARK));
+  const MATERIALYOU_ONPRIMARY_RGB  = JSON.parse(window.MaterialYouBridge.getMaterialYouOnPrimaryRgb(DARK));
 
   const backgroundColorRegex = /background-color\s*:\s*(rgba\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d*\.?\d+)\s*\)|rgb\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)|#([0-9a-fA-F]{6}))\s*;/gi;
   const backgroundRegex = /background\s*:\s*(rgba\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d*\.?\d+)\s*\)|rgb\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)|#([0-9a-fA-F]{6}))\s*;/gi;
@@ -105,10 +107,13 @@
     document.querySelectorAll('img[src*="vTzapVsBgS_.webp"], img[src*="NtDLSQuICbO.webp"]')?.forEach(img => {
       if (processedStyles.has(img)) return;
       processedStyles.add(img);
+      // Facebook's ".ssr .img" is absolute at 100% of an ancestor wider than the logo's own slot;
+      // keep the masked image inside its slot so the logo isn't drawn header-wide.
       img.style.cssText += `
         background-color: ${MATERIALYOU_PRIMARY};
         mask: url(${img.src}) no-repeat center / contain;
         content-visibility: hidden;
+        position: static; width: 100%; height: 100%;
       `;
     });
 

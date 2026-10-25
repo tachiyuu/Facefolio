@@ -1,8 +1,6 @@
-// Hide the Marketplace tab and Marketplace suggestions in the feed
+// Hide Marketplace suggestions in the feed (the header tab is a pinned-tabs setting)
 (() => {
     if (window.isDesktopMode()) return;
-
-    window.hideHeaderTab('marketplace', '󰎂');
 
     const LABELS = new Set(['Marketplace', 'Suggested for you on Marketplace', 'Popular on Marketplace']
         .map(window.normalizeFeedLabel));

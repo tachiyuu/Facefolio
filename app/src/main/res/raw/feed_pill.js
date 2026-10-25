@@ -28,7 +28,7 @@
     const [label, action] = pill.querySelectorAll('span');
 
     // The pill is the app's own UI, so it takes the app's accent color
-    const accent = window.MaterialYouBridge?.getMaterialYouPrimaryRgbString?.();
+    const accent = window.MaterialYouBridge?.getMaterialYouPrimaryRgbString?.(window.isFacebookDark());
     if (accent) pill.style.setProperty('--mb-pill-accent', accent);
 
     pill.onclick = () => {
@@ -39,8 +39,7 @@
     function update() {
         const count = document.querySelectorAll(ITEM).length;
         const peeking = document.documentElement.classList.contains('mb-peek');
-        const light = document.querySelector('meta[name="theme-color"]')?.content?.toLowerCase() === '#ffffff';
-        pill.style.color = light ? '#080809' : '#e4e6eb';
+        pill.style.color = window.isFacebookDark() ? '#e4e6eb' : '#080809';
         label.textContent = `Friends & groups only · ${count} hidden`;
         action.textContent = peeking ? 'Hide' : 'Peek';
         pill.style.display = count ? '' : 'none';

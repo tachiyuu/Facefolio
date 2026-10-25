@@ -57,4 +57,10 @@
     <string name="hide_counts_summary">Posts without the numbers game</string>
     <string name="quiet_badges_title">Quiet badges</string>
     <string name="quiet_badges_summary">A dot instead of unread numbers</string>
+    <string name="pinned_tabs_title">Pinned tabs</string>
+    <string name="pinned_tabs_hint">Tabs shown in the top bar. Home is always there.</string>
+    <string name="tab_home">Home</string>
+    <string name="tab_notifications">Notifications</string>
+    <string name="tab_friends">Friends</string>
+    <string name="tab_messages">Messages</string>
 </resources>

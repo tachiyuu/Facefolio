@@ -18,6 +18,8 @@ import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.HIDE_STOR
 import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.HIDE_SUGGESTED
 import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.IMMERSIVE_MODE
 import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.PINCH_TO_ZOOM
+import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.DEFAULT_PINNED_TABS
+import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.PINNED_TABS
 import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.QUIET_BADGES
 import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.REMOVE_ADS
 import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.STICKY_NAVBAR
@@ -121,6 +123,11 @@ class SettingsViewModel(
         initialValue = initialPrefs[QUIET_BADGES] ?: false,
         started = SharingStarted.WhileSubscribed()
     )
+    val pinnedTabs = dataStore.pinnedTabs.stateIn(
+        scope = viewModelScope,
+        initialValue = initialPrefs[PINNED_TABS] ?: DEFAULT_PINNED_TABS,
+        started = SharingStarted.WhileSubscribed()
+    )
     val isRevertDesktop = dataStore.revertDesktop.stateIn(
         scope = viewModelScope,
         initialValue = false,
@@ -208,6 +215,13 @@ class SettingsViewModel(
     fun setHideGroups(hideGroups: Boolean) {
         viewModelScope.launch {
             dataStore.setHideGroups(hideGroups)
+        }
+    }
+
+    fun togglePinnedTab(tab: String) {
+        val current = pinnedTabs.value
+        viewModelScope.launch {
+            dataStore.setPinnedTabs(if (tab in current) current - tab else current + tab)
         }
     }
 

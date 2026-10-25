@@ -13,6 +13,8 @@
         }
         ${FILL} { --diameter: 9px !important; }
         ${FILL}[data-hidden-ref-key$=".pill.jewel.hidden"] { transform: scale(0.38, 0.48); }
+        /* No badge on the tab you're already on (e.g. "1,800 new" on Home while reading the feed) */
+        div[role="tab"][aria-selected="true"] ${BADGE} { visibility: hidden !important; }
     `;
     document.head.appendChild(style);
 })();

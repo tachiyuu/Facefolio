@@ -69,6 +69,7 @@
             position: 'fixed',
             top: '0',
             left: '0',
+            marginTop: '0',
             width: '100%',
             zIndex: '1000',
             pointerEvents: 'auto'
@@ -85,7 +86,14 @@
 
         if (scroller) {
             const offset = (hasLogo ? navbarHeight : 0) + (hasFeed ? tabbarHeight : 0);
-            const scrollContent = scroller.querySelector(':scope > div:not(.pull-to-refresh-spinner-container)');
+            // The offset goes on the first child still in the page flow. Depending on how Facebook built
+            // the page, the scroller's first child can be the (now fixed) logo bar itself, which would
+            // otherwise be pushed down under the tabs.
+            const scrollContent = [...scroller.children].find(child =>
+                child.tagName === 'DIV' &&
+                !child.classList.contains('pull-to-refresh-spinner-container') &&
+                child !== navbar && child !== tabbar &&
+                getComputedStyle(child).position !== 'fixed');
             scrollContent ? scrollContent.style.marginTop = offset + 'px' : scroller.style.paddingTop = offset + 'px';
 
             if (window.isFeed()) scroller.style.paddingBottom = '0';

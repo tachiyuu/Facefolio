@@ -121,7 +121,8 @@
         if (!rules.length) return;
         for (const m of mutations) {
             const target = m.target.nodeType === 1 ? m.target : m.target.parentElement;
-            const unit = target && outerUnit(target);
+            if (!target || target.closest('[data-mb-ui]')) continue; // the app's own UI (pill, tabs)
+            const unit = outerUnit(target);
             if (unit) pending.add(unit);
             else if (m.addedNodes.length) sweep = true;
         }
@@ -187,6 +188,7 @@
     function groupsTab(color) {
         const a = document.createElement('a');
         a.id = 'mb-groups-tab';
+        a.setAttribute('data-mb-ui', '');
         a.href = '/groups_browse/your_groups/'; // plain /groups/ renders an empty page on m.facebook.com
         a.setAttribute('aria-label', 'Groups');
         // Facebook's page-level click handling swallows plain links in the header

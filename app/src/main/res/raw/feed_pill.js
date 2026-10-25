@@ -1,5 +1,7 @@
-// "Friends & groups only · N hidden" pill at the top of the home feed. Counts the items the feed
-// filter hid (data-mb-hidden, see scripts.js) and lets the user peek at them for a moment.
+// "N hidden · Show" line at the top of the home feed. Counts the items the feed filter hid
+// (data-mb-hidden, see scripts.js) and lets the user peek at them for a moment.
+// Deliberately quiet: no card, border or icon, Facebook's secondary text colour, and the same
+// background as the posts around it, so it reads as a caption rather than one more thing to look at.
 (() => {
     const ID = 'mb-feed-pill';
     const ITEM = '[data-mb-hidden=""]';
@@ -8,59 +10,64 @@
     const style = document.createElement('style');
     style.textContent = `
         #${ID} {
-            display: flex; align-items: center; gap: 10px; box-sizing: border-box;
-            width: calc(100% - 24px); height: 44px; margin: 8px 12px; padding: 0 16px;
-            border: 0; border-radius: 22px; font: inherit; font-size: 14px; text-align: left;
-            background: var(--mb-pill-bg, rgba(128, 128, 128, 0.16)); color: inherit;
+            display: flex; align-items: center; justify-content: center; gap: 6px; box-sizing: border-box;
+            width: 100%; min-height: 36px; margin: 0; padding: 0 16px;
+            border: 0; border-radius: 0; font: inherit; font-size: 13px; line-height: 1;
+            background: var(--mb-row-bg, transparent); color: var(--mb-row-fg, #65676b);
             pointer-events: auto !important; /* Facebook's page root is pointer-events: none */
         }
-        #${ID} span:first-of-type { flex-grow: 1; opacity: 0.8; }
-        #${ID} span:last-of-type { font-weight: 600; color: var(--mb-pill-accent, #1877f2); }
-        /* On the light theme the pill sits on Facebook's grey divider: a solid card reads better */
-        html[data-mb-theme="light"] #${ID} { background: #ffffff; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1); }
-        html[data-mb-theme="light"] #${ID} span:first-of-type { opacity: 1; }
+        #${ID} span:last-of-type { font-weight: 600; }
     `;
     document.head.appendChild(style);
 
-    const pill = document.createElement('button');
-    pill.id = ID;
-    pill.innerHTML = `
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-            <path d="M3 3l18 18"/><path d="M10.6 5.1A9.8 9.8 0 0 1 12 5c5 0 9 5 9 7 0 .9-.8 2.3-2.1 3.6M6.4 6.4C4.3 7.8 3 10.2 3 12c0 2 4 7 9 7 1.6 0 3-.4 4.3-1.1"/>
-        </svg>
-        <span></span><span></span>`;
-    const [label, action] = pill.querySelectorAll('span');
-
-    // The pill is the app's own UI, so it takes the app's accent color
-    const accent = window.MaterialYouBridge?.getMaterialYouPrimaryRgbString?.(window.isFacebookDark());
-    if (accent) pill.style.setProperty('--mb-pill-accent', accent);
+    const row = document.createElement('button');
+    row.id = ID;
+    row.setAttribute('data-mb-ui', ''); // the feed filter ignores changes inside the app's own UI
+    row.innerHTML = '<span></span><span aria-hidden="true">·</span><span></span>';
+    const [label, , action] = row.querySelectorAll('span');
 
     // Facebook's page-level handlers would otherwise also act on the tap
-    pill.addEventListener('click', e => {
+    row.addEventListener('click', e => {
         e.preventDefault();
         e.stopPropagation();
         document.documentElement.classList.toggle('mb-peek');
         update();
     });
 
+    // Post cards paint their background with a ::before; borrow it so the row blends in
+    function matchCards(post) {
+        const card = getComputedStyle(post, '::before').backgroundColor;
+        const fallback = window.isFacebookDark() ? '#242526' : '#ffffff';
+        row.style.setProperty('--mb-row-bg', card && card !== 'rgba(0, 0, 0, 0)' ? card : fallback);
+        row.style.setProperty('--mb-row-fg', window.isFacebookDark() ? '#b0b3b8' : '#65676b');
+    }
+
+    // Writes only on change: every write is a DOM mutation, which would wake this observer (and the
+    // feed filter's) again on the next frame, forever
+    const set = (el, key, value) => { if (el[key] !== value) el[key] = value; };
+
     function update() {
         const count = document.querySelectorAll(ITEM).length;
         const peeking = document.documentElement.classList.contains('mb-peek');
-        pill.style.color = window.isFacebookDark() ? '#e4e6eb' : '#080809';
-        label.textContent = `Friends & groups only · ${count} hidden`;
-        action.textContent = peeking ? 'Hide' : 'Peek';
-        pill.style.display = count ? '' : 'none';
+        set(label, 'textContent', `${count} hidden`);
+        set(action, 'textContent', peeking ? 'Hide' : 'Show');
+        if (row.getAttribute('aria-label') !== `${count} hidden`) row.setAttribute('aria-label', `${count} hidden`);
+        set(row.style, 'display', count ? '' : 'none');
     }
 
-    // Sits above the first post (below the composer and stories). Placed once per feed so it
+    // Sits right above the first post (below the composer and stories). Placed once per feed so it
     // doesn't jump when Facebook recycles posts while scrolling.
     function place() {
-        if (location.pathname !== '/') return pill.remove();
-        if (pill.isConnected) return;
-        const first = document.querySelector(POST);
-        let post = first;
+        if (location.pathname !== '/') return row.remove();
+        if (row.isConnected) return;
+        let post = document.querySelector(POST);
         for (let up = post?.parentElement?.closest(POST); up; up = up.parentElement?.closest(POST)) post = up;
-        post?.before(pill);
+        if (!post) return;
+        matchCards(post);
+        // Above the post's thin divider, so the line joins the composer card instead of
+        // sitting between two dividers as a section of its own
+        const divider = post.previousElementSibling;
+        (divider && divider.offsetHeight <= 12 ? divider : post).before(row);
     }
 
     let scheduled = false;

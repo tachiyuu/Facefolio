@@ -226,6 +226,11 @@ fun MaterialbookWebView(
                 setWindow(settingsVM.immersiveMode.value)
                 viewModel.setThemeColor(originalColor.value)
                 settingsToggle = false
+                // Settings that add or remove scripts apply on close too, not only with "Apply immediately"
+                if (viewModel.refresh(resources = resources, settings = settingsVM)) {
+                    isLoading = true
+                    pendingReload = true
+                }
             },
             onReload = {
                 isLoading = true

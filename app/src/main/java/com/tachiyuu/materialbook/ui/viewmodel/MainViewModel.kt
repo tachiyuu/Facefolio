@@ -5,11 +5,9 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.tachiyuu.materialbook.R
 import com.tachiyuu.materialbook.utils.Script
 import com.tachiyuu.materialbook.utils.fetchScripts
-import kotlinx.coroutines.launch
 
 
 class MainViewModel(
@@ -24,20 +22,17 @@ class MainViewModel(
     val scripts: State<String?> = _scripts
 
     init {
-        loadScripts(
-            resources,
-            settings
-        )
+        _scripts.value = buildScripts(resources, settings)
     }
 
     fun setThemeColor(color: Color) {
         _themeColor.value = color
     }
 
-    private fun loadScripts(
+    private fun buildScripts(
         resources: Resources,
         settings: SettingsViewModel
-    ) {
+    ): String {
         val scripts = listOf(
             Script(true, R.raw.scripts, "scripts.js"), // always apply
             Script(settings.removeAds.value, R.raw.adblock, "adblock.js"),
@@ -63,27 +58,24 @@ class MainViewModel(
         val pinnedTabs = settings.pinnedTabs.value.joinToString(",") { "\"$it\"" }
         val config = "window.__mbPinnedTabs = [$pinnedTabs];\n"
 
-        viewModelScope.launch {
-            _scripts.value = config +
-                fetchScripts(
-                    scripts = scripts,
-                    fallbackContent = { resId ->
-                        resources.openRawResource(resId).bufferedReader()
-                            .use { it.readText() }
-                    }
-                )
-        }
+        return config +
+            fetchScripts(
+                scripts = scripts,
+                fallbackContent = { resId ->
+                    resources.openRawResource(resId).bufferedReader()
+                        .use { it.readText() }
+                }
+            )
     }
 
+    // Rebuilds the bundle from the current settings; true if it changed, so the page needs a reload
     fun refresh(
         resources: Resources,
         settings: SettingsViewModel
-    ) {
-        clearScripts()
-        loadScripts(resources, settings)
-    }
-
-    private fun clearScripts() {
-        _scripts.value = null
+    ): Boolean {
+        val scripts = buildScripts(resources, settings)
+        if (scripts == _scripts.value) return false
+        _scripts.value = scripts
+        return true
     }
 }

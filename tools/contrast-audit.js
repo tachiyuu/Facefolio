@@ -3,7 +3,7 @@
 // Run it once per theme you care about (Facebook light/dark, Material You on/off, AMOLED).
 // Usage: node tools/contrast-audit.js [--pages feed,notifications,menu,groups] [--screens 3] [--limit 15]
 'use strict';
-const { run, args } = require('./cdp');
+const { run, args, sleep } = require('./cdp');
 
 const PAGES = {
     feed: 'https://m.facebook.com/',
@@ -154,13 +154,20 @@ run(async cdp => {
 
     for (const name of opts.pages.split(',')) {
         if (!PAGES[name]) throw new Error(`Unknown page ${name}; pages: ${Object.keys(PAGES).join(', ')}`);
-        await cdp.navigate(PAGES[name], 4000);
+        await cdp.navigate(PAGES[name], 2000);
+        // The feed renders its first visible posts a few seconds after load; until then the page is one screen
+        for (let i = 0; i < 20 && opts.screens > 1; i++) {
+            if (await cdp.evaluate(() => document.documentElement.scrollHeight > innerHeight * 1.5)) break;
+            await sleep(500);
+        }
         const results = new Map();
         for (let s = 0; s < opts.screens; s++) {
             if (s) {
-                const moved = await cdp.evaluate(() => { const y = scrollY; scrollBy(0, Math.round(innerHeight * 0.9)); return scrollY !== y; });
+                const scroll = () => cdp.evaluate(() => { const y = scrollY; scrollBy(0, Math.round(innerHeight * 0.9)); return scrollY !== y; });
+                let moved = await scroll();
+                if (!moved) { await sleep(2000); moved = await scroll(); } // more content may still be loading
                 if (!moved) break;
-                await new Promise(r => setTimeout(r, 1200));
+                await sleep(1200);
             }
             (await cdp.evaluate(scanViewport)).forEach(r => results.set(r.key, r));
         }

@@ -26,6 +26,10 @@ fun fetchScripts(
 // supported (so the feed filter sees items as they appear and ads never flash), and again after
 // load as a fallback, which the flag turns into a no-op. The sourceURL names the bundle in DevTools
 // and CPU profiles (tools/perf-bench.js tells our time from Facebook's by it).
+// Facebook's server HTML carries a placeholder theme-color (#FFFFFF, upper case) that its own script
+// replaces with the account's theme (#ffffff light, #242526 dark) right around DOMContentLoaded. The
+// scripts pick their palette from it once, so on the placeholder they wait for that, 500 ms at most;
+// otherwise a dark account intermittently got the light palette (and no AMOLED).
 fun wrapScripts(scripts: String): String = """
     (function() {
         if (window.top !== window || window.__mbInjected) return;
@@ -33,8 +37,22 @@ fun wrapScripts(scripts: String): String = """
         const run = () => {
 $scripts
         };
-        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run, { once: true });
-        else run();
+        const whenThemeKnown = () => {
+            const meta = document.querySelector('meta[name="theme-color"]');
+            if (!meta || meta.getAttribute('content') !== '#FFFFFF') return run();
+            let started = false;
+            const start = () => {
+                if (started) return;
+                started = true;
+                observer.disconnect();
+                run();
+            };
+            const observer = new MutationObserver(start);
+            observer.observe(meta, { attributes: true, attributeFilter: ['content'] });
+            setTimeout(start, 500);
+        };
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', whenThemeKnown, { once: true });
+        else whenThemeKnown();
     })();
     //# sourceURL=materialbook-scripts.js
 """.trimIndent()

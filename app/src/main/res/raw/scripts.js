@@ -9,7 +9,10 @@ window.__mbFB = Object.freeze({
     tablist: 'div[role="tablist"]',
     tab: 'div[role="tab"]',
     themeColor: 'meta[name="theme-color"]',
-    // Facebook logo in the mobile header (dark, light theme); Material You recolours it
+    // Facebook logo bar in the mobile header (both themes); the sticky navbar keeps it fixed
+    logo: 'div[aria-label*="Facebook"]',
+    // Logo image in the light theme (and the profile story ring); Material You recolours it.
+    // The dark theme's logo is another image (UYsfyMdMkZ_.webp) that stays as it is.
     logoImg: 'img[src*="vTzapVsBgS_.webp"], img[src*="NtDLSQuICbO.webp"]',
     loginLogoImg: 'img[src*="DUiOg0mJTjz.webp"]',
     // Icon font glyphs (private use code points of Facebook's icon font)
@@ -65,7 +68,8 @@ window.__mbFB = Object.freeze({
 (() => {
     window.isFacebookDark = () =>
         document.querySelector(window.__mbFB.themeColor)?.getAttribute('content')?.toLowerCase().trim() !== '#ffffff';
-    // Lets stylesheets target the light theme: html[data-mb-theme="light"]
+    // Lets stylesheets target the light theme: html[data-mb-theme="light"]. The scripts choose their
+    // palette once, from this; the self-check reports when Facebook's theme no longer matches it.
     document.documentElement.setAttribute('data-mb-theme', window.isFacebookDark() ? 'dark' : 'light');
 })();
 
@@ -666,7 +670,9 @@ window.onDomChange(() => {
         feedItems: () => document.querySelectorAll(FB.feedItem).length > 1,
         headerTabs: () => (document.querySelector(FB.tablist)?.querySelectorAll(`:scope > ${FB.tab}`).length ?? 0) >= 2,
         themeColor: () => !!document.querySelector(FB.themeColor)?.getAttribute('content'),
-        logo: () => !!document.querySelector(FB.logoImg),
+        // The palette was chosen for the theme Facebook shows now (not its placeholder theme-color)
+        theme: () => document.documentElement.getAttribute('data-mb-theme') === (window.isFacebookDark() ? 'dark' : 'light'),
+        logo: () => !!document.querySelector(FB.logo) && (window.isFacebookDark() || !!document.querySelector(FB.logoImg)),
         homeGlyph: () => window.isFeed(),
     };
     const TIMEOUT = 20000; // after this the feed counts as loaded, whatever is missing

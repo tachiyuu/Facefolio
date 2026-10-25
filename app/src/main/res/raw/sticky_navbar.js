@@ -59,7 +59,7 @@
         const tabbar = document.querySelector('div[role="tablist"][data-tti-phase="-1"][data-type="container"][data-mcomponent="MContainer"].m');
         const scroller = document.querySelector('div[data-type="vscroller"][data-is-pull-to-refresh-allowed="true"]');
 
-        const hasLogo = navbar?.querySelector('div[aria-label*="Facebook"]');
+        const hasLogo = navbar?.querySelector(window.__mbFB.logo);
         const hasFeed = tabbar?.querySelector('div[aria-label*="feed"]');
 
         const navbarHeight = navbar ? parseFloat(getComputedStyle(navbar).height) || parseFloat(navbar.style.height) || 0 : 0;

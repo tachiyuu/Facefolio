@@ -34,7 +34,8 @@ Things that are expected and not ours: Facebook's green photo glyph in the compo
 ## Self-check in the app
 
 `scripts.js` checks after the home feed loads that its key Facebook hooks still match: mobile checks
-feed items, header tabs, the theme-color meta, the logo and the home icon glyph; desktop checks the
+feed items, header tabs, the theme-color meta, that the palette the scripts chose matches Facebook's
+theme (`theme`), the logo and the home icon glyph; desktop checks the
 header actions, the sticky banner class and the post action bar. The result is in `window.__mbHealth`
 (`status: ok | failed | skipped | pending`, and the failing hook names); failures are also logged with
 `console.warn`. It costs one check every half second while the feed loads (20 s at most) and nothing

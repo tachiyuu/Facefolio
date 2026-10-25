@@ -16,6 +16,7 @@
   }
 
   const processedStyles = new WeakSet();
+  const darkened = new WeakMap();
 
   function processStyles() {
     document.querySelectorAll('style').forEach(style => {
@@ -57,8 +58,11 @@
       }
     });
 
+    // Skips elements whose style hasn't changed since they were last darkened (thousands in the feed)
     document.querySelectorAll('[style*="background-color"]').forEach(el => {
-      const style = el.getAttribute('style')?.replace(backgroundColorRegex, (m, g, r, g2, b, hex) => {
+      const before = el.getAttribute('style');
+      if (darkened.get(el) === before) return;
+      const style = before?.replace(backgroundColorRegex, (m, g, r, g2, b, hex) => {
         if (['#18191a', '#242526', 'rgba(36,37,38,1.0)'].includes(g)) return 'background-color:#000000;';
         if (r && g2 && b && isLightGray(+r, +g2, +b) || g === 'rgb(37, 39, 40)') return 'background-color:#121212;';
         if (hex && isLightGray(...[0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16)))) {
@@ -66,7 +70,8 @@
         }
         return m;
       });
-      if (style !== el.getAttribute('style')) el.setAttribute('style', style);
+      if (style !== before) el.setAttribute('style', style);
+      darkened.set(el, style);
     });
 
     // Login-specific AB
@@ -200,15 +205,23 @@
 
   loginAndCookieCSS();
 
+  // At most once per frame, however many matching mutations arrive in it
+  let scheduled = false;
+  const scheduleProcess = () => {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => { scheduled = false; processStyles(); });
+  };
+
   new MutationObserver(mutations => {
-    if (mutations.some(m =>
+    if (!scheduled && mutations.some(m =>
       (m.type === 'childList' && Array.from(m.addedNodes).some(n =>
         n.tagName === 'STYLE' || (n.nodeType === 1 && n.hasAttribute('style')) ||
         (n.tagName === 'META' && n.getAttribute('name') === 'theme-color'))) ||
       (m.type === 'characterData' && m.target.parentNode?.tagName === 'STYLE') ||
       (m.type === 'attributes' && (m.attributeName === 'style' ||
         (m.target.tagName === 'META' && m.attributeName === 'content'))))
-    ) processStyles();
+    ) scheduleProcess();
   }).observe(document.documentElement, {
     childList: true,
     subtree: true,

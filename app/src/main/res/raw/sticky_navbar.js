@@ -116,5 +116,5 @@
     };
 
     applyStyles();
-    new MutationObserver(applyStyles).observe(document.body, { childList: true, subtree: true });
+    window.onDomChange(applyStyles);
 })();

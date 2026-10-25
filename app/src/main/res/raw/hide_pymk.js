@@ -11,14 +11,7 @@
 
   hidePymk();
 
-  const obs = new MutationObserver(() => {
-    hidePymk();
-  });
-
-  obs.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
+  window.onDomChange(hidePymk);
 })();
 
 

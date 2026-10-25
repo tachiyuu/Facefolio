@@ -341,15 +341,19 @@
     // Initial check
     processPage();
 
-    // Set up DOM observer
+    // Set up DOM observer (at most one check per frame)
+    let scheduled = false;
     const observer = new MutationObserver(mutations => {
+      if (scheduled) return;
       const hasRelevantChanges = mutations.some(
         mutation =>
           (mutation.type === "childList" && mutation.addedNodes.length > 0) ||
           (mutation.type === "attributes" &&
             mutation.target.tagName === "IMG")
       );
-      if (hasRelevantChanges) processPage();
+      if (!hasRelevantChanges) return;
+      scheduled = true;
+      requestAnimationFrame(() => { scheduled = false; processPage(); });
     });
 
     observer.observe(document.body, {

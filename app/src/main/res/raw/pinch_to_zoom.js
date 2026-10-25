@@ -7,19 +7,12 @@
             viewport.name = "viewport";
             document.head.appendChild(viewport);
         }
-        // allow zooming on photos.
-        if (!window.location.href.includes("facebook.com/photo.php"))
-            viewport.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no";
+        // allow zooming on photos. Written only on change: each write makes the browser recompute the viewport
+        const locked = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no";
+        if (!window.location.href.includes("facebook.com/photo.php") && viewport.content !== locked)
+            viewport.content = locked;
     }
 
     applyViewportLock();
-
-    const observer = new MutationObserver(() => {
-        applyViewportLock();
-    });
-
-    observer.observe(document.head || document.documentElement, {
-        childList: true,
-        subtree: true
-    });
+    window.onDomChange(applyViewportLock);
 })();

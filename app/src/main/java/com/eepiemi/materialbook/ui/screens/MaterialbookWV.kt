@@ -325,8 +325,6 @@ fun MaterialbookWebView(
                     "MaterialYouBridge"
                 )
 
-                setLayerType(View.LAYER_TYPE_HARDWARE, null)
-
                 overScrollMode = View.OVER_SCROLL_NEVER
                 isVerticalScrollBarEnabled = false
                 isHorizontalScrollBarEnabled = false

@@ -28,7 +28,70 @@
   // Mechanism to prevent some parts of the code infinitely triggering the MO, causing the function to loop
   const processedStyles = new WeakSet();
 
-  function processMaterialYouStyles() {
+  const recolorColor = (m, gr, Ar, Ag, Ab, Aa, r, g, b, hex) => {
+    if ((r && g && b && isFacebookBlue(+r, +g, +b)) ||
+    (hex && isFacebookBlue(...[0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16)))) || hex === 'e8eaee') return `color:${MATERIALYOU_PRIMARY};`;
+    if (Ar && Ag && Ab && isFacebookBlue(+Ar, +Ag, +Ab)) return `color: rgba(${MATERIALYOU_PRIMARY_RGB.r}, ${MATERIALYOU_PRIMARY_RGB.g}, ${MATERIALYOU_PRIMARY_RGB.b}, ${+Aa});`;
+    if (gr === 'rgb(17, 17, 18)') return `color:#111112; caret-color:${MATERIALYOU_PRIMARY};`; // hacky communication between amoled_black.js and this file
+    return m;
+  };
+
+  const recolorBackgroundColor = (m, gr, Ar, Ag, Ab, Aa, r, g, b, hex) => {
+    if ((r && g && b && isFacebookBlue(+r, +g, +b)) ||
+    (hex && isFacebookBlue(...[0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16))))) return `background-color:${MATERIALYOU_PRIMARY};`;
+    if (Ar && Ag && Ab && isFacebookBlue(+Ar, +Ag, +Ab)) return `background-color: rgba(${MATERIALYOU_PRIMARY_RGB.r}, ${MATERIALYOU_PRIMARY_RGB.g}, ${MATERIALYOU_PRIMARY_RGB.b}, ${+Aa});`;
+    if (gr === 'rgb(102, 106, 114)') return `background-color: ${MATERIALYOU_PRIMARY};`;
+    if (hex === '252f3c') return `background-color: transparent;`;
+    return m;
+  };
+
+  const recolorBackground = (m, gr, Ar, Ag, Ab, Aa, r, g, b, hex) => {
+    if ((r && g && b && isFacebookBlue(+r, +g, +b)) ||
+    (hex && isFacebookBlue(...[0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16))))) return `background:${MATERIALYOU_PRIMARY};`;
+    if (Ar && Ag && Ab && isFacebookBlue(+Ar, +Ag, +Ab)) return `background: rgba(${MATERIALYOU_PRIMARY_RGB.r}, ${MATERIALYOU_PRIMARY_RGB.g}, ${MATERIALYOU_PRIMARY_RGB.b}, ${+Aa});`;
+    return m;
+  };
+
+  const recolorBorder = (m, px, gr, Ar, Ag, Ab, Aa, r, g, b, hex) => {
+    if ((r && g && b && isFacebookBlue(+r, +g, +b)) ||
+    (hex && isFacebookBlue(...[0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16))))) return `border: ${px} solid ${MATERIALYOU_PRIMARY};`;
+    if (Ar && Ag && Ab && isFacebookBlue(+Ar, +Ag, +Ab)) return `border: ${px} solid rgba(${MATERIALYOU_PRIMARY_RGB.r}, ${MATERIALYOU_PRIMARY_RGB.g}, ${MATERIALYOU_PRIMARY_RGB.b}, ${+Aa});`;
+    if (gr === 'rgb(102, 106, 114)') return `border: ${px} solid ${MATERIALYOU_PRIMARY};`;
+    return m;
+  };
+
+  // Last style each element was recoloured to
+  const recolored = new WeakMap();
+
+  function recolorInline(el) {
+    const before = el.getAttribute('style');
+    if (!before || recolored.get(el) === before) return;
+    let style = before;
+    if (style.includes('color')) style = style.replace(colorRegex, recolorColor);
+    if (style.includes('background-color')) style = style.replace(backgroundColorRegex, recolorBackgroundColor);
+    if (style.includes('background')) style = style.replace(backgroundRegex, recolorBackground);
+    if (style.includes('border:')) style = style.replace(borderRegex, recolorBorder);
+    if (style !== before) el.setAttribute('style', style);
+    recolored.set(el, style);
+  }
+
+  function recolorNbc(el) {
+    const nbc = el.style.getPropertyValue('--nbc');
+    if (nbc && isFacebookBlue(...[1, 3, 5].map(i => parseInt(nbc.slice(i, i + 2), 16)))) el.style.setProperty('--nbc', MATERIALYOU_PRIMARY);
+  }
+
+  // root itself (if it matches) plus its matching descendants
+  const within = (root, selector) =>
+    root === document ? [...document.querySelectorAll(selector)]
+      : (root.matches(selector) ? [root] : []).concat([...root.querySelectorAll(selector)]);
+
+  // root = document for the first pass; afterwards only the nodes that were added or restyled
+  function processMaterialYouStyles(root = document) {
+    if (root === document) processStyleTags();
+    processInline(root);
+  }
+
+  function processStyleTags() {
     document.querySelectorAll('style')?.forEach(style => {
       if (processedStyles.has(style)) return;
       processedStyles.add(style);
@@ -54,57 +117,18 @@
         });
       }
     });
+  }
 
-    document.querySelectorAll('[style*="color"]')?.forEach(el => {
-      const style = el.getAttribute('style')?.replace(colorRegex, (m, gr, Ar, Ag, Ab, Aa, r, g, b, hex) => {
-        if ((r && g && b && isFacebookBlue(+r, +g, +b)) ||
-        (hex && isFacebookBlue(...[0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16)))) || hex === 'e8eaee') return `color:${MATERIALYOU_PRIMARY};`;
-        if (Ar && Ag && Ab && isFacebookBlue(+Ar, +Ag, +Ab)) return `color: rgba(${MATERIALYOU_PRIMARY_RGB.r}, ${MATERIALYOU_PRIMARY_RGB.g}, ${MATERIALYOU_PRIMARY_RGB.b}, ${+Aa});`;
-        if (gr === 'rgb(17, 17, 18)') return `color:#111112; caret-color:${MATERIALYOU_PRIMARY};`; // hacky communication between amoled_black.js and this file
-        return m;
-      });
-      if (style !== el.getAttribute('style')) el.setAttribute('style', style);
-    });
+  function processInline(root) {
+    // Inline styles, skipping elements whose style hasn't changed since they were last recoloured
+    // (re-scanning the feed's thousands of styled elements on every DOM change was the costliest
+    // thing the app did while scrolling)
+    within(root, '[style]').forEach(recolorInline);
 
-    document.querySelectorAll('[style*="background-color"]')?.forEach(el => {
-      const style = el.getAttribute('style')?.replace(backgroundColorRegex, (m, gr, Ar, Ag, Ab, Aa, r, g, b, hex) => {
-        if ((r && g && b && isFacebookBlue(+r, +g, +b)) ||
-        (hex && isFacebookBlue(...[0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16))))) return `background-color:${MATERIALYOU_PRIMARY};`;
-        if (Ar && Ag && Ab && isFacebookBlue(+Ar, +Ag, +Ab)) return `background-color: rgba(${MATERIALYOU_PRIMARY_RGB.r}, ${MATERIALYOU_PRIMARY_RGB.g}, ${MATERIALYOU_PRIMARY_RGB.b}, ${+Aa});`;
-        if (gr === 'rgb(102, 106, 114)') return `background-color: ${MATERIALYOU_PRIMARY};`;
-        if (hex === '252f3c') return `background-color: transparent;`;
-        return m;
-      });
-      if (style !== el.getAttribute('style')) el.setAttribute('style', style);
-    });
-
-    document.querySelectorAll('[style*="background"]')?.forEach(el => {
-      const style = el.getAttribute('style')?.replace(backgroundRegex, (m, gr, Ar, Ag, Ab, Aa, r, g, b, hex) => {
-        if ((r && g && b && isFacebookBlue(+r, +g, +b)) ||
-        (hex && isFacebookBlue(...[0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16))))) return `background:${MATERIALYOU_PRIMARY};`;
-        if (Ar && Ag && Ab && isFacebookBlue(+Ar, +Ag, +Ab)) return `background: rgba(${MATERIALYOU_PRIMARY_RGB.r}, ${MATERIALYOU_PRIMARY_RGB.g}, ${MATERIALYOU_PRIMARY_RGB.b}, ${+Aa});`;
-        return m;
-      });
-      if (style !== el.getAttribute('style')) el.setAttribute('style', style);
-    });
-
-    document.querySelectorAll('[style*="border:"]')?.forEach(el => {
-      const style = el.getAttribute('style')?.replace(borderRegex, (m, px, gr, Ar, Ag, Ab, Aa, r, g, b, hex) => {
-        if ((r && g && b && isFacebookBlue(+r, +g, +b)) ||
-        (hex && isFacebookBlue(...[0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16))))) return `border: ${px} solid ${MATERIALYOU_PRIMARY};`;
-        if (Ar && Ag && Ab && isFacebookBlue(+Ar, +Ag, +Ab)) return `border: ${px} solid rgba(${MATERIALYOU_PRIMARY_RGB.r}, ${MATERIALYOU_PRIMARY_RGB.g}, ${MATERIALYOU_PRIMARY_RGB.b}, ${+Aa});`;
-        if (gr === 'rgb(102, 106, 114)') return `border: ${px} solid ${MATERIALYOU_PRIMARY};`;
-        return m;
-      });
-      if (style !== el.getAttribute('style')) el.setAttribute('style', style);
-    });
-
-    document.querySelectorAll('[style*="--nbc"]')?.forEach(el => {
-      if (isFacebookBlue(...[1, 3, 5].map(i => parseInt(el.style.getPropertyValue('--nbc').slice(i, i + 2), 16)))) el.style.setProperty('--nbc', MATERIALYOU_PRIMARY);
-    });
+    within(root, '[style*="--nbc"]').forEach(recolorNbc);
 
     // Recolor story ring on the profile page + feed FB logo in light mode
-    document.querySelectorAll('img[src*="vTzapVsBgS_.webp"], img[src*="NtDLSQuICbO.webp"]')?.forEach(img => {
+    within(root, 'img[src*="vTzapVsBgS_.webp"], img[src*="NtDLSQuICbO.webp"]').forEach(img => {
       if (processedStyles.has(img)) return;
       processedStyles.add(img);
       // Facebook's ".ssr .img" is absolute at 100% of an ancestor wider than the logo's own slot;
@@ -118,7 +142,7 @@
     });
 
     // Swap FB logo on the login screen
-    document.querySelectorAll('img[src*="DUiOg0mJTjz.webp"]')?.forEach(img => {
+    within(root, 'img[src*="DUiOg0mJTjz.webp"]').forEach(img => {
       size = img.style.maxHeight;
       svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" width="${parseInt(size) * 1.5}px" height="${parseInt(size) * 1.5}px">
                     <circle cx="54" cy="54" r="54" fill="${MATERIALYOU_PRIMARY}" />
@@ -179,8 +203,28 @@
 
   materialYouCSS();
 
-  new MutationObserver(() => {
-    processMaterialYouStyles();
+  // Incremental: once per frame, only the subtrees that were added and the elements whose style
+  // changed (Facebook recolours some elements in place). Our own recolouring writes are style
+  // changes too, but recolorInline skips them as already done.
+  const added = new Set(), restyled = new Set();
+  let scheduled = false;
+  const flush = () => {
+    scheduled = false;
+    if ([...added].some(el => el.tagName === 'STYLE' || el.querySelector('style'))) processStyleTags();
+    restyled.forEach(el => { if (!added.has(el)) { recolorInline(el); recolorNbc(el); } });
+    added.forEach(el => { if (el.isConnected) processInline(el); });
+    added.clear();
+    restyled.clear();
+  };
+  new MutationObserver(mutations => {
+    for (const m of mutations) {
+      if (m.type === 'attributes') restyled.add(m.target);
+      else m.addedNodes.forEach(n => { if (n.nodeType === 1) added.add(n); });
+    }
+    if (!scheduled && (added.size || restyled.size)) {
+      scheduled = true;
+      requestAnimationFrame(flush);
+    }
   }).observe(document.documentElement, {
     childList: true,
     subtree: true,

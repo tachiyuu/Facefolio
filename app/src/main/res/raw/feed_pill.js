@@ -70,18 +70,12 @@
         (divider && divider.offsetHeight <= 12 ? divider : post).before(row);
     }
 
-    let scheduled = false;
     const refresh = () => {
-        if (scheduled) return;
-        scheduled = true;
-        requestAnimationFrame(() => {
-            scheduled = false;
-            place();
-            update();
-        });
+        place();
+        update();
     };
 
     document.addEventListener('mb-feed-hidden', refresh);
-    new MutationObserver(refresh).observe(document.body, { childList: true, subtree: true });
+    window.onDomChange(refresh);
     refresh();
 })();

@@ -6,6 +6,30 @@
     }
 })();
 
+// One shared observer for scripts that simply re-run when the page changes. Facebook makes dozens of
+// DOM mutations per frame while scrolling; each callback here runs at most once per frame instead of
+// once per mutation. Only node additions/removals wake it (not style writes), so callbacks that set
+// styles can't keep it awake, and changes inside the app's own UI (data-mb-ui) are ignored.
+(() => {
+    const callbacks = new Set();
+    let scheduled = false;
+    const run = () => {
+        scheduled = false;
+        callbacks.forEach(fn => {
+            try { fn(); } catch (e) { console.error('[Materialbook]', e); }
+        });
+    };
+    new MutationObserver(mutations => {
+        if (scheduled) return;
+        const ours = m => (m.target.nodeType === 1 ? m.target : m.target.parentElement)?.closest('[data-mb-ui]');
+        if (mutations.every(ours)) return;
+        scheduled = true;
+        requestAnimationFrame(run);
+    }).observe(document.documentElement, { childList: true, subtree: true });
+
+    window.onDomChange = fn => callbacks.add(fn);
+})();
+
 // Facebook's own theme (set in the account, independent of the system): its light theme uses a white theme-color
 (() => {
     window.isFacebookDark = () =>
@@ -368,7 +392,11 @@
 
 // Enable press and hold caption selection and apply custom selection color
 (() => {
+  // Each text element only needs this once; the feed has thousands of them
+  const done = new WeakSet();
   const makeSelectable = (el) => {
+    if (done.has(el)) return;
+    done.add(el);
     if (el.closest('div[role="button"]')) return;
     el.style.userSelect = 'text';
     el.style.pointerEvents = 'auto';
@@ -388,11 +416,7 @@
   document.head.appendChild(selectionStyle);
 
   updateText();
-
-  new MutationObserver(updateText).observe(document.body, {
-    childList: true,
-    subtree: true
-  });
+  window.onDomChange(updateText);
 })();
 
 // Enhance Loading Overlay Script
@@ -404,23 +428,16 @@
         });
     }
     applyOverlayStyle();
-
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            if (mutation.addedNodes.length)
-                applyOverlayStyle();
-        });
-    });
-
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true
-    });
+    window.onDomChange(applyOverlayStyle);
 })();
 
 // Hide facebook download button and other distractions at login page
 (function() {
+  // A live collection: checking it is cheap, unlike the attribute searches below on a large feed
+  const loginUi = document.getElementsByClassName('wbloks_1');
+
   function removeDistr() {
+    if (!loginUi.length) return; // only the login / account screens are built with this UI
     document.querySelector('div[data-bloks-name="bk.components.Flexbox"][style*="background: rgb(255, 255, 255)"].wbloks_1')?.parentElement?.remove();
 
     document.querySelectorAll(
@@ -432,18 +449,7 @@
   }
 
   removeDistr();
-
-  new MutationObserver(mutations => {
-    for (const m of mutations) {
-      if (m.type === 'childList' && m.addedNodes.length) {
-        removeDistr();
-        break;
-      }
-    }
-  }).observe(document.body, {
-    childList: true,
-    subtree: true
-  });
+  window.onDomChange(removeDistr);
 })();
 
 // Make the loading bar's background transparent
@@ -457,7 +463,7 @@
 })();
 
 // Hide annoying bottom banners
-const observer = new MutationObserver(() => {
+window.onDomChange(() => {
 
   if (location.pathname === '/'
   && document.querySelector('div[role="button"][aria-label*="Facebook"]') === null) return;
@@ -473,8 +479,6 @@ const observer = new MutationObserver(() => {
     }
   }
 });
-
-observer.observe(document.body, { childList: true, subtree: true });
 
 
 // Hold Effect Script
@@ -557,13 +561,11 @@ observer.observe(document.body, { childList: true, subtree: true });
 
     insertButton();
 
-    const observer = new MutationObserver(() => {
+    window.onDomChange(() => {
       if (!document.getElementById(BUTTON_ID) && isFeed()) {
         insertButton();
       }
     });
-
-    observer.observe(document.body, { childList: true, subtree: true });
 
     // observer for theme-color changes
     const themeMeta = document.querySelector('meta[name="theme-color"]');

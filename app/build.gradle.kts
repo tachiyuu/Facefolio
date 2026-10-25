@@ -14,8 +14,8 @@ android {
         applicationId = "com.eepiemi.materialbook"
         minSdk = 23
         targetSdk = 36
-        versionCode = 14
-        versionName = "1.1.0"
+        versionCode = 15
+        versionName = "1.1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -48,6 +48,25 @@ android {
     buildFeatures {
         compose = true
     }
+
+    // Only the languages the app ships (plus Vietnamese for library/system strings): drops the
+    // translations bundled by AndroidX/Compose for every other locale from resources.arsc
+    androidResources {
+        localeFilters += listOf("en", "vi", "ar", "bn", "de", "es", "fr", "it", "pl", "pt", "zh-rTW")
+    }
+
+    // Build metadata nothing reads at runtime (no Kotlin reflection, no coroutine debug probes)
+    packaging {
+        resources {
+            excludes += listOf(
+                "kotlin/**",
+                "META-INF/*.version",
+                "META-INF/**/*.kotlin_builtins",
+                "DebugProbesKt.bin",
+                "kotlin-tooling-metadata.json"
+            )
+        }
+    }
 }
 
 dependencies {
@@ -60,7 +79,6 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.datastore.preferences)

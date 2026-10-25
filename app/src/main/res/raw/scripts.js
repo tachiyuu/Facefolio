@@ -559,12 +559,22 @@ window.onDomChange(() => {
       else if (container) container.insertBefore(button, container.firstChild);
     };
 
+    // On mobile the button is fixed to where the home header sits; on other pages (Notifications)
+    // that spot is the tab bar, so it only shows on the home feed
+    const showOnHomeOnly = () => {
+      const btn = document.getElementById(BUTTON_ID);
+      const display = window.isDesktopMode() || location.pathname === '/' ? 'flex' : 'none';
+      if (btn && btn.style.display !== display) btn.style.display = display;
+    };
+
     insertButton();
+    showOnHomeOnly();
 
     window.onDomChange(() => {
       if (!document.getElementById(BUTTON_ID) && isFeed()) {
         insertButton();
       }
+      showOnHomeOnly();
     });
 
     // observer for theme-color changes

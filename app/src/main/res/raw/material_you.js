@@ -8,7 +8,7 @@
 
   const backgroundColorRegex = /background-color\s*:\s*(rgba\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d*\.?\d+)\s*\)|rgb\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)|#([0-9a-fA-F]{6}))\s*;/gi;
   const backgroundRegex = /background\s*:\s*(rgba\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d*\.?\d+)\s*\)|rgb\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)|#([0-9a-fA-F]{6}))\s*;/gi;
-  const colorRegex = /color\s*:\s*(rgba\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d*\.?\d+)\s*\)|rgb\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)|#([0-9a-fA-F]{6}))\s*;/gi;
+  const colorRegex = /(?<![-\w])color\s*:\s*(rgba\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d*\.?\d+)\s*\)|rgb\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)|#([0-9a-fA-F]{6}))\s*;/gi;
   const borderRegex = /border\s*:\s*(\d{1}px)\s+solid\s+(rgba\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d*\.?\d+)\s*\)|rgb\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)|#([0-9a-fA-F]{6}))\s*;/gi;
   const borderColorRegex = /border-color\s*:\s*(rgba\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d*\.?\d+)\s*\)|rgb\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)|#([0-9a-fA-F]{6}))\s*;/gi;
 
@@ -25,38 +25,96 @@
     );
   }
 
+  // ---- Contrast guard ----
+  // Facebook's palette is contrast-safe for its own theme. Pasting the Material You primary in verbatim
+  // is not: a dark-theme primary is a light pastel, so formulas like "primary at 49%" turned subtle
+  // dark surfaces into bright slate ones. So every substitute colour is derived from the colour it
+  // replaces:
+  // - tone(): surfaces and backgrounds keep the original's luminance, only the hue/saturation becomes
+  //   the primary's. Same luminance means the same contrast against anything, in light, dark and AMOLED.
+  // - accent(): text, icons and borders use the primary when it has at least the contrast the original
+  //   had against the page; otherwise they fall back to tone() of the original.
+  const rgbOf = (r, g, b, hex) => hex ? [0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16)) : [+r, +g, +b];
+  const channel = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+  const luminance = ([r, g, b]) => 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+  const contrast = (a, b) => {
+    const x = luminance(a), y = luminance(b);
+    return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+  };
+
+  const PRIMARY = [MATERIALYOU_PRIMARY_RGB.r, MATERIALYOU_PRIMARY_RGB.g, MATERIALYOU_PRIMARY_RGB.b];
+  const SURFACE = rgbOf(0, 0, 0, (document.querySelector('meta[name="theme-color"]')?.getAttribute('content') || '')
+    .replace('#', '').match(/^[0-9a-f]{6}$/i)?.[0] || (DARK ? '242526' : 'ffffff'));
+
+  function rgbToHsl([r, g, b]) {
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b), l = (max + min) / 2, d = max - min;
+    if (!d) return [0, 0, l];
+    const s = d / (1 - Math.abs(2 * l - 1));
+    const h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+    return [h * 60, s, l];
+  }
+
+  function hslToRgb(h, s, l) {
+    const c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs(((h / 60) % 2) - 1)), m = l - c / 2;
+    const [r, g, b] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
+    return [r, g, b].map(v => Math.round((v + m) * 255));
+  }
+
+  const [HUE, SAT] = rgbToHsl(PRIMARY);
+  const toneCache = new Map();
+
+  // The primary's hue with the given colour's luminance (lightness found by bisection)
+  function tone(rgb) {
+    const key = rgb.join();
+    if (toneCache.has(key)) return toneCache.get(key);
+    const target = luminance(rgb);
+    let lo = 0, hi = 1;
+    for (let i = 0; i < 24; i++) {
+      const mid = (lo + hi) / 2;
+      if (luminance(hslToRgb(HUE, SAT, mid)) < target) lo = mid; else hi = mid;
+    }
+    const result = hslToRgb(HUE, SAT, (lo + hi) / 2);
+    toneCache.set(key, result);
+    return result;
+  }
+
+  const accent = rgb => contrast(PRIMARY, SURFACE) >= contrast(rgb, SURFACE) ? PRIMARY : tone(rgb);
+  const css = ([r, g, b], alpha) => alpha == null ? `rgb(${r}, ${g}, ${b})` : `rgba(${r}, ${g}, ${b}, ${alpha})`;
+
   // Mechanism to prevent some parts of the code infinitely triggering the MO, causing the function to loop
   const processedStyles = new WeakSet();
 
+  // Callback arguments from the regexes: gr = whole value, (Ar, Ag, Ab, Aa) = rgba, (r, g, b) = rgb, hex.
+  // Text-like roles (colour, borders) use accent(); surfaces (backgrounds) use tone().
+  const isBlue = (r, g, b, hex) => (r && g && b && isFacebookBlue(+r, +g, +b)) || (hex && isFacebookBlue(...rgbOf(0, 0, 0, hex)));
+  const isBlueRgba = (Ar, Ag, Ab) => Ar && Ag && Ab && isFacebookBlue(+Ar, +Ag, +Ab);
+
   const recolorColor = (m, gr, Ar, Ag, Ab, Aa, r, g, b, hex) => {
-    if ((r && g && b && isFacebookBlue(+r, +g, +b)) ||
-    (hex && isFacebookBlue(...[0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16)))) || hex === 'e8eaee') return `color:${MATERIALYOU_PRIMARY};`;
-    if (Ar && Ag && Ab && isFacebookBlue(+Ar, +Ag, +Ab)) return `color: rgba(${MATERIALYOU_PRIMARY_RGB.r}, ${MATERIALYOU_PRIMARY_RGB.g}, ${MATERIALYOU_PRIMARY_RGB.b}, ${+Aa});`;
+    if (isBlue(r, g, b, hex) || hex === 'e8eaee') return `color:${css(accent(rgbOf(r, g, b, hex)))};`;
+    if (isBlueRgba(Ar, Ag, Ab)) return `color: ${css(accent([+Ar, +Ag, +Ab]), +Aa)};`;
     if (gr === 'rgb(17, 17, 18)') return `color:#111112; caret-color:${MATERIALYOU_PRIMARY};`; // hacky communication between amoled_black.js and this file
     return m;
   };
 
   const recolorBackgroundColor = (m, gr, Ar, Ag, Ab, Aa, r, g, b, hex) => {
-    if ((r && g && b && isFacebookBlue(+r, +g, +b)) ||
-    (hex && isFacebookBlue(...[0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16))))) return `background-color:${MATERIALYOU_PRIMARY};`;
-    if (Ar && Ag && Ab && isFacebookBlue(+Ar, +Ag, +Ab)) return `background-color: rgba(${MATERIALYOU_PRIMARY_RGB.r}, ${MATERIALYOU_PRIMARY_RGB.g}, ${MATERIALYOU_PRIMARY_RGB.b}, ${+Aa});`;
-    if (gr === 'rgb(102, 106, 114)') return `background-color: ${MATERIALYOU_PRIMARY};`;
+    if (isBlue(r, g, b, hex)) return `background-color:${css(tone(rgbOf(r, g, b, hex)))};`;
+    if (isBlueRgba(Ar, Ag, Ab)) return `background-color: ${css(tone([+Ar, +Ag, +Ab]), +Aa)};`;
+    if (gr === 'rgb(102, 106, 114)') return `background-color: ${css(tone([102, 106, 114]))};`;
     if (hex === '252f3c') return `background-color: transparent;`;
     return m;
   };
 
   const recolorBackground = (m, gr, Ar, Ag, Ab, Aa, r, g, b, hex) => {
-    if ((r && g && b && isFacebookBlue(+r, +g, +b)) ||
-    (hex && isFacebookBlue(...[0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16))))) return `background:${MATERIALYOU_PRIMARY};`;
-    if (Ar && Ag && Ab && isFacebookBlue(+Ar, +Ag, +Ab)) return `background: rgba(${MATERIALYOU_PRIMARY_RGB.r}, ${MATERIALYOU_PRIMARY_RGB.g}, ${MATERIALYOU_PRIMARY_RGB.b}, ${+Aa});`;
+    if (isBlue(r, g, b, hex)) return `background:${css(tone(rgbOf(r, g, b, hex)))};`;
+    if (isBlueRgba(Ar, Ag, Ab)) return `background: ${css(tone([+Ar, +Ag, +Ab]), +Aa)};`;
     return m;
   };
 
   const recolorBorder = (m, px, gr, Ar, Ag, Ab, Aa, r, g, b, hex) => {
-    if ((r && g && b && isFacebookBlue(+r, +g, +b)) ||
-    (hex && isFacebookBlue(...[0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16))))) return `border: ${px} solid ${MATERIALYOU_PRIMARY};`;
-    if (Ar && Ag && Ab && isFacebookBlue(+Ar, +Ag, +Ab)) return `border: ${px} solid rgba(${MATERIALYOU_PRIMARY_RGB.r}, ${MATERIALYOU_PRIMARY_RGB.g}, ${MATERIALYOU_PRIMARY_RGB.b}, ${+Aa});`;
-    if (gr === 'rgb(102, 106, 114)') return `border: ${px} solid ${MATERIALYOU_PRIMARY};`;
+    if (isBlue(r, g, b, hex)) return `border: ${px} solid ${css(accent(rgbOf(r, g, b, hex)))};`;
+    if (isBlueRgba(Ar, Ag, Ab)) return `border: ${px} solid ${css(accent([+Ar, +Ag, +Ab]), +Aa)};`;
+    if (gr === 'rgb(102, 106, 114)') return `border: ${px} solid ${css(accent([102, 106, 114]))};`;
     return m;
   };
 
@@ -77,7 +135,7 @@
 
   function recolorNbc(el) {
     const nbc = el.style.getPropertyValue('--nbc');
-    if (nbc && isFacebookBlue(...[1, 3, 5].map(i => parseInt(nbc.slice(i, i + 2), 16)))) el.style.setProperty('--nbc', MATERIALYOU_PRIMARY);
+    if (nbc && isFacebookBlue(...rgbOf(0, 0, 0, nbc.trim().slice(1)))) el.style.setProperty('--nbc', css(accent(rgbOf(0, 0, 0, nbc.trim().slice(1)))));
   }
 
   // root itself (if it matches) plus its matching descendants
@@ -97,22 +155,20 @@
       processedStyles.add(style);
 
       if (style.innerHTML) {
+        // Facebook's blue-tinted surfaces (unread highlights, selected rows) keep their own luminance
         style.innerHTML = style.innerHTML?.replace(backgroundColorRegex, (m, gr, Ar, Ag, Ab, Aa, r, g, b, hex) => {
-          if ((r && g && b && isFacebookBlue(+r, +g, +b)) ||
-          (hex && isFacebookBlue(...[0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16))))) return `background-color:${MATERIALYOU_PRIMARY};`;
-          if (Ar && Ag && Ab && isFacebookBlue(+Ar, +Ag, +Ab)) return `background-color: rgba(${MATERIALYOU_PRIMARY_RGB.r}, ${MATERIALYOU_PRIMARY_RGB.g}, ${MATERIALYOU_PRIMARY_RGB.b}, ${+Aa});`;
+          if (isBlue(r, g, b, hex)) return `background-color:${css(tone(rgbOf(r, g, b, hex)))};`;
+          if (isBlueRgba(Ar, Ag, Ab)) return `background-color: ${css(tone([+Ar, +Ag, +Ab]), +Aa)};`;
           if (gr === 'rgba(0,152,124,1.0)') return `background-color:${MATERIALYOU_ONPRIMARY};`;
-          if (gr === 'rgba(231,243,255,1.0)') return `background-color: rgba(${MATERIALYOU_PRIMARY_RGB.r}, ${MATERIALYOU_PRIMARY_RGB.g}, ${MATERIALYOU_PRIMARY_RGB.b}, 0.098);`;
-          if (gr === 'rgba(235,245,255,1.0)') return `background-color: rgba(${MATERIALYOU_PRIMARY_RGB.r}, ${MATERIALYOU_PRIMARY_RGB.g}, ${MATERIALYOU_PRIMARY_RGB.b}, 0.2);`;
-          if (gr === 'rgba(37,47,60,1.0)') return `background-color: rgb(${Object.values(MATERIALYOU_PRIMARY_RGB).map(c => Math.round(c * 0.49)).join(', ')});`;
-          if (hex === '252f3c') return `background-color: rgba(${MATERIALYOU_PRIMARY_RGB.r}, ${MATERIALYOU_PRIMARY_RGB.g}, ${MATERIALYOU_PRIMARY_RGB.b}, 0.49);`;
+          if (gr === 'rgba(231,243,255,1.0)') return `background-color: ${css(tone([231, 243, 255]))};`;
+          if (gr === 'rgba(235,245,255,1.0)') return `background-color: ${css(tone([235, 245, 255]))};`;
+          if (gr === 'rgba(37,47,60,1.0)' || hex === '252f3c') return `background-color: ${css(tone([37, 47, 60]))};`;
           return m;
         });
 
         style.innerHTML = style.innerHTML?.replace(borderColorRegex, (m, gr, Ar, Ag, Ab, Aa, r, g, b, hex) => {
-          if ((r && g && b && isFacebookBlue(+r, +g, +b)) ||
-          (hex && isFacebookBlue(...[0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16))))) return `border-color:${MATERIALYOU_PRIMARY};`;
-          if (Ar && Ag && Ab && isFacebookBlue(+Ar, +Ag, +Ab)) return `border-color: rgba(${MATERIALYOU_PRIMARY_RGB.r}, ${MATERIALYOU_PRIMARY_RGB.g}, ${MATERIALYOU_PRIMARY_RGB.b}, ${+Aa});`;
+          if (isBlue(r, g, b, hex)) return `border-color:${css(accent(rgbOf(r, g, b, hex)))};`;
+          if (isBlueRgba(Ar, Ag, Ab)) return `border-color: ${css(accent([+Ar, +Ag, +Ab]), +Aa)};`;
           return m;
         });
       }
@@ -158,44 +214,50 @@
   processMaterialYouStyles();
 
   function materialYouCSS() {
+    // Facebook's own blue for this theme is the reference the contrast guard keeps to
+    const FB_BLUE = DARK ? [45, 136, 255] : [8, 102, 255];
+    const ACCENT = css(accent(FB_BLUE));       // links, icons, indicators
+    const FILL = css(tone(FB_BLUE));           // filled buttons: same luminance as Facebook's, so white labels stay readable
+    const TINT = a => css(tone(FB_BLUE), a);   // translucent highlights
+
     const style = document.createElement('style');
     style.textContent = `
       ::selection {
-        background: rgba(${MATERIALYOU_PRIMARY_RGB.r}, ${MATERIALYOU_PRIMARY_RGB.g}, ${MATERIALYOU_PRIMARY_RGB.b}, 0.5);
+        background: ${TINT(0.5)};
         color: ${MATERIALYOU_ONPRIMARY};
       }
 
       .wbloks_11 { --wbloks-fig-blue-tint-10: ${MATERIALYOU_ONPRIMARY} !important; }
-      .wbloks_70, ._al7j a, ._aqwl { color: ${MATERIALYOU_PRIMARY}; }
-      ._al7j ._al65, ._9nqa:checked + ._9nqb, .pull-to-refresh-spinner, .loading-bar-animation { background-color: ${MATERIALYOU_PRIMARY}; }
-      .revamped-progress-bar-color .loading-bar-animation { background: ${MATERIALYOU_PRIMARY}; }
+      .wbloks_70, ._al7j a, ._aqwl { color: ${ACCENT}; }
+      ._al7j ._al65, ._9nqa:checked + ._9nqb, .pull-to-refresh-spinner, .loading-bar-animation { background-color: ${ACCENT}; }
+      .revamped-progress-bar-color .loading-bar-animation { background: ${ACCENT}; }
       .pull-to-refresh-spinner-icon { color: ${MATERIALYOU_ONPRIMARY}; }
 
       :root, .__fb-light-mode:root, .__fb-light-mode, .__fb-dark-mode:root, .__fb-dark-mode {
-        --primary-button-background: ${MATERIALYOU_PRIMARY} !important;
-        --blue-link: ${MATERIALYOU_PRIMARY} !important;
-        --focus-ring-blue: ${MATERIALYOU_PRIMARY} !important;
-        --accent: ${MATERIALYOU_PRIMARY} !important;
-        --primary-icon: ${MATERIALYOU_PRIMARY} !important;
-        --primary-deemphasized-button-text: ${MATERIALYOU_PRIMARY} !important;
-        --highlight-bg: rgba(${MATERIALYOU_PRIMARY_RGB.r}, ${MATERIALYOU_PRIMARY_RGB.g}, ${MATERIALYOU_PRIMARY_RGB.b}, 0.2) !important;
-        --primary-deemphasized-button-background: rgba(${MATERIALYOU_PRIMARY_RGB.r}, ${MATERIALYOU_PRIMARY_RGB.g}, ${MATERIALYOU_PRIMARY_RGB.b}, 0.2) !important;
-        --primary-deemphasized-button-pressed-overlay: rgba(${MATERIALYOU_PRIMARY_RGB.r}, ${MATERIALYOU_PRIMARY_RGB.g}, ${MATERIALYOU_PRIMARY_RGB.b}, 0.15) !important;
+        --primary-button-background: ${FILL} !important;
+        --blue-link: ${ACCENT} !important;
+        --focus-ring-blue: ${ACCENT} !important;
+        --accent: ${ACCENT} !important;
+        --primary-icon: ${ACCENT} !important;
+        --primary-deemphasized-button-text: ${ACCENT} !important;
+        --highlight-bg: ${TINT(0.2)} !important;
+        --primary-deemphasized-button-background: ${TINT(0.2)} !important;
+        --primary-deemphasized-button-pressed-overlay: ${TINT(0.15)} !important;
       }
 
       /* Tint mobile Facebook logo and active navigation tabs */
       svg path[fill="#0866FF"], svg path[fill="#1877F2"], [fill="#1877f2"], [fill="#0866ff"] {
-        fill: ${MATERIALYOU_PRIMARY} !important;
+        fill: ${ACCENT} !important;
       }
       div[role="tab"][aria-selected="true"] svg, div[role="tab"][aria-selected="true"] path {
-        fill: ${MATERIALYOU_PRIMARY} !important;
+        fill: ${ACCENT} !important;
       }
       div[role="tab"][aria-selected="true"] {
-        border-bottom-color: ${MATERIALYOU_PRIMARY} !important;
+        border-bottom-color: ${ACCENT} !important;
       }
       /* Tint buttons and interactive links */
       [data-mcomponent="MContainer"] [role="button"][style*="background"] {
-        border-color: ${MATERIALYOU_PRIMARY} !important;
+        border-color: ${ACCENT} !important;
       }
     `;
     document.head.appendChild(style);

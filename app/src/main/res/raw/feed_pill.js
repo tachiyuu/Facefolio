@@ -34,12 +34,17 @@
         update();
     });
 
-    // Post cards paint their background with a ::before; borrow it so the row blends in
-    function matchCards(post) {
-        const card = getComputedStyle(post, '::before').backgroundColor;
-        const fallback = window.isFacebookDark() ? '#242526' : '#ffffff';
-        row.style.setProperty('--mb-row-bg', card && card !== 'rgba(0, 0, 0, 0)' ? card : fallback);
-        row.style.setProperty('--mb-row-fg', window.isFacebookDark() ? '#b0b3b8' : '#65676b');
+    // Post cards paint their background with a ::before; borrow it so the row blends in. Re-read on
+    // every update, not once: themes repaint cards after load (AMOLED turns them black), and a colour
+    // captured earlier left a grey strip between black posts.
+    let cardSource = null;
+    function matchCards() {
+        if (!cardSource?.isConnected) return;
+        const card = getComputedStyle(cardSource, '::before').backgroundColor;
+        const bg = card && card !== 'rgba(0, 0, 0, 0)' ? card : (window.isFacebookDark() ? '#242526' : '#ffffff');
+        const fg = window.isFacebookDark() ? '#b0b3b8' : '#65676b';
+        if (row.style.getPropertyValue('--mb-row-bg') !== bg) row.style.setProperty('--mb-row-bg', bg);
+        if (row.style.getPropertyValue('--mb-row-fg') !== fg) row.style.setProperty('--mb-row-fg', fg);
     }
 
     // Writes only on change: every write is a DOM mutation, which would wake this observer (and the
@@ -53,6 +58,7 @@
         set(action, 'textContent', peeking ? 'Hide' : 'Show');
         if (row.getAttribute('aria-label') !== `${count} hidden`) row.setAttribute('aria-label', `${count} hidden`);
         set(row.style, 'display', count ? '' : 'none');
+        matchCards();
     }
 
     // Sits right above the first post (below the composer and stories). Placed once per feed so it
@@ -63,7 +69,7 @@
         let post = document.querySelector(POST);
         for (let up = post?.parentElement?.closest(POST); up; up = up.parentElement?.closest(POST)) post = up;
         if (!post) return;
-        matchCards(post);
+        cardSource = post;
         // Above the post's thin divider, so the line joins the composer card instead of
         // sitting between two dividers as a section of its own
         const divider = post.previousElementSibling;

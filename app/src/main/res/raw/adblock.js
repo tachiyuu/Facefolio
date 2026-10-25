@@ -19,6 +19,7 @@
         'div.native-text.rslh > span.f5[style*="color:#8a8d91"]:not([data-nosnippet])';
 
     window.addFeedFilter((unit, labels) =>
-        labels.some(text => LABELS.has(text)) || unit.querySelector(AD_MARKUP) !== null
+        labels.some(text => LABELS.has(text)) || unit.querySelector(AD_MARKUP) !== null,
+        'ads'
     );
 })();

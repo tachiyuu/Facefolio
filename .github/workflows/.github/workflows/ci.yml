@@ -1,0 +1,35 @@
+name: CI
+
+# Catches the cheap mistakes before they reach a phone: an injected script that doesn't parse, a
+# window.__mbFB hook name with a typo (fails silently at runtime), or a build that doesn't compile.
+# The device tools in tools/ need a phone and stay manual (see tools/README.md).
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  scripts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check injected scripts
+        run: node tools/check-scripts.js
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+      - name: Build debug APK
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace

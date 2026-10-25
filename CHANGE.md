@@ -1,38 +1,35 @@
-## Materialbook - v1.0.0
+## Materialbook - v1.1.3
 
-<ins>**Changelog:**</ins>
+* The app has its own package name, `com.tachiyuu.materialbook`. It installs as a separate app from the original, so you need to log in again and re-select your settings.
+* Removed the *Support my work* button from settings.
 
-* Feature: Add 'Material You' setting that themes Facebook's blues using your MY colors.
-* Feature: Hide more login screen distractions.
-* Tweak: Settings are now a full page, with visual sections of settings. (upstream)
-* Tweak: Settings use Material You fallback colors on Android 10 or below.
-* Tweak: Change the button at the bottom of settings to a 'Support my work! ☕' button.
-* Tweak: Change settings gear's icon and color.
-* Tweak: Change default settings.
-* Tweak: Make loading bar's background transparent.
-* Tweak: Increase settings header vertical padding
-* Tweak: Make settings header use default background color
-* Fix: Navigation bar's color follows the settings' background color when inside settings.
-* Fix: Improve AMOLED Black.
-* Non-app related: Improved the README.
+## Materialbook - v1.1.2
 
-> [!NOTE]
-> I'm sorry this update has taken multiple months.
->
-> The Material You script was not good enough to publish by my standards
-> (even when it did get the job done), so as I got better I did a full rewrite
-> and made it 4x shorter and increased the coverage.
+First release of this fork, based on eepiemi/Materialbook 1.0.0.
 
-> [!TIP]
-> Did you find a place that isn't AMOLED Black or Material You? Comment
-> in [this discussion](https://github.com/eepiemi/Materialbook/discussions/1).
->
-> Or maybe you're dissatisfied with the lack of translations for some elements? Help
-> me get everything translated by commenting in
-> [this discussion](https://github.com/eepiemi/Materialbook/discussions/2).
-> Any help with the large amount of gaps that are present will be HIGHLY APPRECIATED!!
->
-> Or you just have an issue? File an issue [here](https://github.com/eepiemi/Materialbook/issues/new/choose).
-> I can't guarantee I'll be able to fix it with my current Kotlin + Jetpack Compose skills though 😅
+**Feed**
+* One shared feed filter for all hiding features. Ads are detected from their label, including labels Facebook draws as SVG.
+* Suggested posts and People you may know are hidden by default.
+* New settings: hide AI-generated posts (on by default), hide Marketplace suggestions.
+* A "N hidden · Show" line above the feed shows how many posts were hidden and lets you view them.
 
-I REALLY hope you enjoy what has become the biggest project of my life! 🥹
+**Top bar**
+* Pinned tabs: choose which tabs are shown (default Home, Groups, Notifications). Groups is a new tab that opens Your Groups.
+* New settings: hide like & share counts, quiet badges.
+
+**Look**
+* Material You follows Facebook's own light/dark setting, and replacement colours keep the contrast of the colours they replace.
+* AMOLED Black no longer applies on Facebook's light theme.
+* New app icon.
+* Redesigned settings: grouped sections, switches with check/cross marks, a "Show in feed" dialog.
+
+**Fixes**
+* With Sticky Navbar on, the logo bar could be pushed below the tabs.
+* Settings stored in cookies (such as Facebook's dark mode) and logins are saved when the app goes to the background.
+* Google sign-in pages open inside the app.
+* External links no longer get double-encoded.
+
+**Size and performance**
+* Scripts are bundled in the app instead of downloaded from GitHub at runtime; the Ktor network library is removed.
+* Less work per page change in the injected scripts.
+* The WebView no longer uses an extra hardware layer.

@@ -7,15 +7,15 @@ plugins {
 }
 
 android {
-    namespace = "com.eepiemi.materialbook"
+    namespace = "com.tachiyuu.materialbook"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.eepiemi.materialbook"
+        applicationId = "com.tachiyuu.materialbook"
         minSdk = 23
         targetSdk = 36
-        versionCode = 16
-        versionName = "1.1.2"
+        versionCode = 17
+        versionName = "1.1.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

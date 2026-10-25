@@ -74,7 +74,6 @@ and it supports Android's monochrome themed icons.
   the `fbclid` tracking parameter is stripped.
 - Google sign-in pages open inside the app, so you can log in to Facebook with Google.
 - A settings button (⚙) sits in the header of the home feed.
-- The settings page has a *Support my work* button that opens the original author's Buy Me a Coffee page.
 - The app contains no analytics or tracking of its own. All scripts are bundled in the APK; nothing
   is downloaded at runtime apart from Facebook itself.
 
@@ -83,9 +82,8 @@ and it supports Android's monochrome themed icons.
 Download the APK from [Releases](https://github.com/tachiyuu/Materialbook/releases/latest).
 
 - Requires Android 6.0 (API 23) or later.
-- The package name is the same as the original app (`com.eepiemi.materialbook`), but this fork is
-  signed with a different key, so Android will not install it over the original app. Uninstall the
-  original first; you will need to log in to Facebook again.
+- The package name is `com.tachiyuu.materialbook` (since 1.1.3). It installs as a separate app from
+  the original Materialbook and from version 1.1.2 of this fork, which used the original's package name.
 
 ## Build from source
 

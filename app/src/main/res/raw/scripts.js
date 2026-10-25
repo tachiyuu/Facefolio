@@ -489,7 +489,7 @@ window.onDomChange(() => {
 })();
 
 
-/* The below scripts are specific to com.eepiemi.materialbook application. */
+/* The below scripts are specific to com.tachiyuu.materialbook application. */
 
 (() => {
   const onReady = (fn) => {

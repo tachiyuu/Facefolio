@@ -9,6 +9,7 @@ import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.AMOLED_BL
 import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.DESKTOP_LAYOUT
 import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.ENABLE_COPY_TO_CLIPBOARD
 import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.ENABLE_DOWNLOAD_CONTENT
+import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.HIDE_AI_CONTENT
 import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.HIDE_COUNTS
 import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.HIDE_GROUPS
 import com.eepiemi.materialbook.data.local.SettingsDataStore.Companion.HIDE_MARKETPLACE
@@ -123,6 +124,11 @@ class SettingsViewModel(
         initialValue = initialPrefs[QUIET_BADGES] ?: false,
         started = SharingStarted.WhileSubscribed()
     )
+    val hideAiContent = dataStore.hideAiContent.stateIn(
+        scope = viewModelScope,
+        initialValue = initialPrefs[HIDE_AI_CONTENT] ?: true,
+        started = SharingStarted.WhileSubscribed()
+    )
     val pinnedTabs = dataStore.pinnedTabs.stateIn(
         scope = viewModelScope,
         initialValue = initialPrefs[PINNED_TABS] ?: DEFAULT_PINNED_TABS,
@@ -215,6 +221,12 @@ class SettingsViewModel(
     fun setHideGroups(hideGroups: Boolean) {
         viewModelScope.launch {
             dataStore.setHideGroups(hideGroups)
+        }
+    }
+
+    fun setHideAiContent(hideAiContent: Boolean) {
+        viewModelScope.launch {
+            dataStore.setHideAiContent(hideAiContent)
         }
     }
 

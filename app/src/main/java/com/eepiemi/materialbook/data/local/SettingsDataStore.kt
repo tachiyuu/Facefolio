@@ -30,6 +30,7 @@ class SettingsDataStore(private val context: Context) {
         val HIDE_MARKETPLACE = booleanPreferencesKey("hide_marketplace")
         val HIDE_COUNTS = booleanPreferencesKey("hide_counts")
         val QUIET_BADGES = booleanPreferencesKey("quiet_badges")
+        val HIDE_AI_CONTENT = booleanPreferencesKey("hide_ai_content")
         val PINNED_TABS = stringSetPreferencesKey("pinned_tabs")
         // Header tabs besides Home, keyed as in scripts.js; Groups is a tab the app adds
         val PINNABLE_TABS = listOf("groups", "notifications", "friends", "messages", "reels", "marketplace")
@@ -127,6 +128,11 @@ class SettingsDataStore(private val context: Context) {
     val quietBadges = context.dataStore.data.map { it[QUIET_BADGES] ?: false }
     suspend fun setQuietBadges(quietBadges: Boolean) {
         context.dataStore.edit { it[QUIET_BADGES] = quietBadges }
+    }
+
+    val hideAiContent = context.dataStore.data.map { it[HIDE_AI_CONTENT] ?: true }
+    suspend fun setHideAiContent(hideAiContent: Boolean) {
+        context.dataStore.edit { it[HIDE_AI_CONTENT] = hideAiContent }
     }
 
     val pinnedTabs = context.dataStore.data.map { it[PINNED_TABS] ?: DEFAULT_PINNED_TABS }

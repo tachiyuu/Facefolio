@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.BurstMode
 import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material.icons.filled.Diversity1
@@ -88,6 +89,7 @@ fun SettingsContent(
         viewModel.hideStories.collectAsState().value to R.string.stories,
         viewModel.hideMarketplace.collectAsState().value to R.string.marketplace,
         viewModel.hideGroups.collectAsState().value to R.string.groups,
+        viewModel.hideAiContent.collectAsState().value to R.string.ai_content,
     ).filter { it.first }.map { stringResource(it.second).lowercase() }
 
     var isPinnedTabsOpen by rememberSaveable { mutableStateOf(false) }
@@ -320,6 +322,7 @@ private fun HideOptionsDialog(
     val hidePeopleYouMayKnow = viewModel.hidePeopleYouMayKnow.collectAsState()
     val hideGroups = viewModel.hideGroups.collectAsState()
     val hideMarketplace = viewModel.hideMarketplace.collectAsState()
+    val hideAiContent = viewModel.hideAiContent.collectAsState()
 
     // Switches here mean "shown in feed": on = visible, off = hidden (stored settings are "hide X")
     Dialog(
@@ -344,6 +347,9 @@ private fun HideOptionsDialog(
             }
             FeedItemToggle(Icons.Filled.Storefront, stringResource(R.string.marketplace), hideMarketplace.value) {
                 viewModel.setHideMarketplace(!hideMarketplace.value)
+            }
+            FeedItemToggle(Icons.Filled.AutoAwesome, stringResource(R.string.ai_content), hideAiContent.value) {
+                viewModel.setHideAiContent(!hideAiContent.value)
             }
             if (!viewModel.desktopLayout.collectAsState().value) {
                 FeedItemToggle(Icons.Filled.Diversity1, stringResource(R.string.groups), hideGroups.value) {

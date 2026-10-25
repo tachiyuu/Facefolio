@@ -10,6 +10,8 @@
 (() => {
     window.isFacebookDark = () =>
         document.querySelector('meta[name="theme-color"]')?.getAttribute('content')?.toLowerCase().trim() !== '#ffffff';
+    // Lets stylesheets target the light theme: html[data-mb-theme="light"]
+    document.documentElement.setAttribute('data-mb-theme', window.isFacebookDark() ? 'dark' : 'light');
 })();
 
 // Feed identifier
@@ -160,6 +162,10 @@
         div[role="tablist"] > div[role="tab"], #mb-groups-tab { flex: 0 0 auto !important; margin: 0 !important; }
         div[role="tablist"] > :not([role="tab"]):not(#mb-groups-tab) { flex: 0 0 100% !important; }
         div[role="tablist"] > [data-mb-unpinned] { display: none !important; }
+        /* Facebook's light theme greys unselected tab icons (#65676b); make them read clearly */
+        html[data-mb-theme="light"] div[role="tablist"] > div[role="tab"][aria-selected="false"] .am > .native-text {
+            color: #3a3b3c !important;
+        }
         #mb-groups-tab {
             width: 69px; height: 48px; display: flex; align-items: center; justify-content: center;
             pointer-events: auto !important; /* the bar is pointer-events: none, its tabs opt back in */
@@ -209,7 +215,7 @@
 
         if (pins.has('groups') && tabs.length && !document.getElementById('mb-groups-tab')) {
             const plain = tabs.find(tab => tab.getAttribute('aria-selected') === 'false') || tabs[0];
-            const glyph = plain.querySelector('.native-text') || plain;
+            const glyph = plain.querySelector('.am > .native-text') || plain;
             const tab = groupsTab(getComputedStyle(glyph).color);
             // Match the thin line Facebook draws under every tab
             const line = [...plain.children].find(child => child.offsetHeight === 2);

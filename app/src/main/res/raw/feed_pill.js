@@ -12,9 +12,13 @@
             width: calc(100% - 24px); height: 44px; margin: 8px 12px; padding: 0 16px;
             border: 0; border-radius: 22px; font: inherit; font-size: 14px; text-align: left;
             background: var(--mb-pill-bg, rgba(128, 128, 128, 0.16)); color: inherit;
+            pointer-events: auto !important; /* Facebook's page root is pointer-events: none */
         }
         #${ID} span:first-of-type { flex-grow: 1; opacity: 0.8; }
         #${ID} span:last-of-type { font-weight: 600; color: var(--mb-pill-accent, #1877f2); }
+        /* On the light theme the pill sits on Facebook's grey divider: a solid card reads better */
+        html[data-mb-theme="light"] #${ID} { background: #ffffff; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1); }
+        html[data-mb-theme="light"] #${ID} span:first-of-type { opacity: 1; }
     `;
     document.head.appendChild(style);
 
@@ -31,10 +35,13 @@
     const accent = window.MaterialYouBridge?.getMaterialYouPrimaryRgbString?.(window.isFacebookDark());
     if (accent) pill.style.setProperty('--mb-pill-accent', accent);
 
-    pill.onclick = () => {
+    // Facebook's page-level handlers would otherwise also act on the tap
+    pill.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
         document.documentElement.classList.toggle('mb-peek');
         update();
-    };
+    });
 
     function update() {
         const count = document.querySelectorAll(ITEM).length;

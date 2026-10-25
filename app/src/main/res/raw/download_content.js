@@ -329,7 +329,7 @@
 
           if (flAcDiv) {
             const span = flAcDiv.querySelector('span');
-            if (span && span.textContent.includes('󱥬')) {
+            if (span && span.textContent.includes(window.__mbFB.glyphs.openApp)) {
               button.style.display = 'none';
             }
           }

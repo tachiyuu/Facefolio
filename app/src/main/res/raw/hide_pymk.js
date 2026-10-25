@@ -24,6 +24,7 @@
   ].map(window.normalizeFeedLabel));
 
   window.addFeedFilter((unit, labels) =>
-    labels.slice(0, 4).some(text => LABELS.has(text))
+    labels.slice(0, 4).some(text => LABELS.has(text)),
+    'pymk'
   );
 })();

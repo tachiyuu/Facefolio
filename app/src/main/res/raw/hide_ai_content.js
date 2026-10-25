@@ -6,5 +6,5 @@
     ].map(window.normalizeFeedLabel));
 
     // Only the header, where Facebook puts the label: a post merely mentioning "AI info" stays
-    window.addFeedFilter((unit, labels) => labels.slice(0, 8).some(text => LABELS.has(text)));
+    window.addFeedFilter((unit, labels) => labels.slice(0, 8).some(text => LABELS.has(text)), 'ai');
 })();

@@ -184,7 +184,7 @@
     within(root, '[style*="--nbc"]').forEach(recolorNbc);
 
     // Recolor story ring on the profile page + feed FB logo in light mode
-    within(root, 'img[src*="vTzapVsBgS_.webp"], img[src*="NtDLSQuICbO.webp"]').forEach(img => {
+    within(root, window.__mbFB.logoImg).forEach(img => {
       if (processedStyles.has(img)) return;
       processedStyles.add(img);
       // Facebook's ".ssr .img" is absolute at 100% of an ancestor wider than the logo's own slot;
@@ -198,7 +198,7 @@
     });
 
     // Swap FB logo on the login screen
-    within(root, 'img[src*="DUiOg0mJTjz.webp"]').forEach(img => {
+    within(root, window.__mbFB.loginLogoImg).forEach(img => {
       size = img.style.maxHeight;
       svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" width="${parseInt(size) * 1.5}px" height="${parseInt(size) * 1.5}px">
                     <circle cx="54" cy="54" r="54" fill="${MATERIALYOU_PRIMARY}" />

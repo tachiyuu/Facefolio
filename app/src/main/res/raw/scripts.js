@@ -1,4 +1,35 @@
 
+// Facebook hooks: the selectors and icon glyphs the scripts depend on. Facebook has no stable markup,
+// so when a feature stops working after a Facebook update, look here first (the self-check at the end
+// of this file reports which hooks stopped matching, see window.__mbHealth). Scripts that run after
+// this one read it as window.__mbFB.
+window.__mbFB = Object.freeze({
+    // Any of these is one item of the feed (post, ad, reel shelf, ...)
+    feedItem: '[aria-posinset], div[data-tracking-duration-id], div.vertically-snappable, article',
+    tablist: 'div[role="tablist"]',
+    tab: 'div[role="tab"]',
+    themeColor: 'meta[name="theme-color"]',
+    // Facebook logo in the mobile header (dark, light theme); Material You recolours it
+    logoImg: 'img[src*="vTzapVsBgS_.webp"], img[src*="NtDLSQuICbO.webp"]',
+    loginLogoImg: 'img[src*="DUiOg0mJTjz.webp"]',
+    // Icon font glyphs (private use code points of Facebook's icon font)
+    glyphs: Object.freeze({
+        home: '\u{F1946}',        // header button that only exists on the home feed
+        headerAnchor: '\u{F194A}', // header button the settings button is inserted next to
+        openApp: '\u{F196C}',     // "open in app" button
+        reels: ['\u{F2020}', '\u{F08DD}'],
+    }),
+    // Desktop layout (www.facebook.com): obfuscated class names
+    desktop: Object.freeze({
+        stickyBanner: 'xixxii4',
+        actionBar: '.xbmvrgn.x1diwwjn',
+        actionBarButton: '.x10b6aqq.x1yrsyyn.xs83m0k',
+        headerActions: '.x6s0dn4.x78zum5.x1s65kcs.x1n2onr6.x1ja2u2z',
+        reelsShelf: 'div.x6ikm8r.x10wlt62',
+        reelsShelfChild: 'div.x6s0dn4.x78zum5.xnpuxes',
+    }),
+});
+
 // Desktop mode identifier
 (() => {
     window.isDesktopMode = () => {
@@ -33,7 +64,7 @@
 // Facebook's own theme (set in the account, independent of the system): its light theme uses a white theme-color
 (() => {
     window.isFacebookDark = () =>
-        document.querySelector('meta[name="theme-color"]')?.getAttribute('content')?.toLowerCase().trim() !== '#ffffff';
+        document.querySelector(window.__mbFB.themeColor)?.getAttribute('content')?.toLowerCase().trim() !== '#ffffff';
     // Lets stylesheets target the light theme: html[data-mb-theme="light"]
     document.documentElement.setAttribute('data-mb-theme', window.isFacebookDark() ? 'dark' : 'light');
 })();
@@ -47,7 +78,7 @@
         if (window.isDesktopMode()) return isHomeUrl;
 
         const hasSpecialButton = Array.from(document.querySelectorAll('[role="button"] span'))
-            .some(span => span.textContent === '󱥆');
+            .some(span => span.textContent === window.__mbFB.glyphs.home);
 
         return isHomeUrl && hasSpecialButton;
     };
@@ -56,8 +87,9 @@
 // Feed filter: hides whole feed items matched by any registered rule (ads, suggested posts, ...).
 // Rules get the item and its short labels, so they don't depend on Facebook's markup or obfuscation.
 (() => {
-    const UNIT = '[aria-posinset], div[data-tracking-duration-id], div.vertically-snappable, article';
+    const UNIT = window.__mbFB.feedItem;
     const MARK = 'data-mb-hidden';
+    const RULE = 'data-mb-rule'; // which rule hid the item (read by tools/feed-audit.js)
     const rules = [];
 
     const style = document.createElement('style');
@@ -111,8 +143,10 @@
         if (unit.querySelector('[role="tab"]')) return; // the mobile header is a feed item too
 
         const texts = labels(unit);
-        if (!rules.some(rule => rule(unit, texts))) return;
+        const hit = rules.find(({ rule }) => rule(unit, texts));
+        if (!hit) return;
         unit.setAttribute(MARK, '');
+        unit.setAttribute(RULE, hit.name);
 
         // Mobile feed draws a thin separator before each post
         const separator = unit.previousElementSibling;
@@ -154,9 +188,11 @@
     }).observe(document.body, { childList: true, subtree: true, characterData: true });
 
     // rule(unit, labels) => true to hide the item. labels are passed through normalizeFeedLabel.
+    // name identifies the rule in the item's data-mb-rule attribute.
     window.normalizeFeedLabel = normalize;
-    window.addFeedFilter = rule => {
-        rules.push(rule);
+    window.feedLabels = labels;
+    window.addFeedFilter = (rule, name = 'unnamed') => {
+        rules.push({ rule, name });
         sweep = true;
         schedule();
     };
@@ -179,16 +215,17 @@
     // Tabs keep their own width (their content is laid out inside it); only the row is ours.
     // Facebook's .m containers are column flexboxes, hence the explicit direction. Other children
     // of the bar (the "‹ Notifications" title row on some pages) wrap below at full width, as before.
+    const { tablist: TABLIST, tab: TAB } = window.__mbFB;
     style.textContent = `
-        div[role="tablist"]:has(> div[role="tab"]) {
+        ${TABLIST}:has(> ${TAB}) {
             display: flex !important; flex-direction: row !important; flex-wrap: wrap !important;
             justify-content: space-around !important; align-items: flex-start !important;
         }
-        div[role="tablist"] > div[role="tab"], #mb-groups-tab { flex: 0 0 auto !important; margin: 0 !important; }
-        div[role="tablist"] > :not([role="tab"]):not(#mb-groups-tab) { flex: 0 0 100% !important; }
-        div[role="tablist"] > [data-mb-unpinned] { display: none !important; }
+        ${TABLIST} > ${TAB}, #mb-groups-tab { flex: 0 0 auto !important; margin: 0 !important; }
+        ${TABLIST} > :not([role="tab"]):not(#mb-groups-tab) { flex: 0 0 100% !important; }
+        ${TABLIST} > [data-mb-unpinned] { display: none !important; }
         /* Facebook's light theme greys unselected tab icons (#65676b); make them read clearly */
-        html[data-mb-theme="light"] div[role="tablist"] > div[role="tab"][aria-selected="false"] .am > .native-text {
+        html[data-mb-theme="light"] ${TABLIST} > ${TAB}[aria-selected="false"] .am > .native-text {
             color: #3a3b3c !important;
         }
         #mb-groups-tab {
@@ -226,9 +263,9 @@
     }
 
     function apply() {
-        const tablist = document.querySelector('div[role="tablist"]');
+        const tablist = document.querySelector(TABLIST);
         if (!tablist) return;
-        const tabs = [...tablist.querySelectorAll(':scope > div[role="tab"]')];
+        const tabs = [...tablist.querySelectorAll(`:scope > ${TAB}`)];
         tabs.forEach((tab, i) => {
             const unpinned = !pins.has(keyOf(tab, i, tabs.length));
             if (unpinned !== tab.hasAttribute('data-mb-unpinned')) tab.toggleAttribute('data-mb-unpinned', unpinned);
@@ -236,7 +273,7 @@
 
         const background = tabs.length ? getComputedStyle(tabs[0], '::before').backgroundColor : '';
         const rule = background && background !== 'rgba(0, 0, 0, 0)'
-            ? `div[role="tablist"]:has(> div[role="tab"]) { background-color: ${background} !important; }` : '';
+            ? `${TABLIST}:has(> ${TAB}) { background-color: ${background} !important; }` : '';
         if (barStyle.textContent !== rule) barStyle.textContent = rule;
 
         if (pins.has('groups') && tabs.length && !document.getElementById('mb-groups-tab')) {
@@ -284,8 +321,9 @@
         }).observe(document.body, { childList: true, subtree: true });
       });
 
+      const STICKY = window.__mbFB.desktop.stickyBanner;
       const forceAbsolute = el => {
-        if (el?.classList.contains('xixxii4')) {
+        if (el?.classList.contains(STICKY)) {
           el.style.setProperty('position', 'absolute', 'important');
         }
       };
@@ -293,22 +331,22 @@
       waitForBanner().then(banner => {
         const style = document.createElement('style');
         style.textContent = `
-          div[role="banner"].xixxii4,
-          div[role="banner"] .xixxii4 {
+          div[role="banner"].${STICKY},
+          div[role="banner"] .${STICKY} {
             position: absolute !important;
           }
         `;
         document.head.appendChild(style);
 
         forceAbsolute(banner);
-        banner.querySelectorAll('.xixxii4').forEach(forceAbsolute);
+        banner.querySelectorAll(`.${STICKY}`).forEach(forceAbsolute);
 
         new MutationObserver(mutations => {
           for (const m of mutations) {
             if (m.type === 'childList') {
               m.addedNodes.forEach(n => {
                 forceAbsolute(n);
-                n.querySelectorAll?.('.xixxii4')?.forEach(forceAbsolute);
+                n.querySelectorAll?.(`.${STICKY}`)?.forEach(forceAbsolute);
               });
             } else if (m.type === 'attributes' && m.attributeName === 'class') {
               forceAbsolute(m.target);
@@ -322,8 +360,8 @@
     // Remove "send" button to save space
     // Remove the third element in the interaction bar if nb is 4
     (function() {
-      const parentSelector = '.xbmvrgn.x1diwwjn';
-      const childSelector = '.x10b6aqq.x1yrsyyn.xs83m0k';
+      const parentSelector = window.__mbFB.desktop.actionBar;
+      const childSelector = window.__mbFB.desktop.actionBarButton;
 
       function checkAndRemoveThird(parent) {
         const children = parent.querySelectorAll(childSelector);
@@ -506,7 +544,7 @@ window.onDomChange(() => {
         </svg>`;
 
     const getFillColor = () => {
-      const color = document.querySelector('meta[name="theme-color"]')?.content?.toLowerCase();
+      const color = document.querySelector(window.__mbFB.themeColor)?.content?.toLowerCase();
       return color === '#ffffff' ? '#080809' : '#e4e6eb';
     };
 
@@ -517,12 +555,10 @@ window.onDomChange(() => {
 
     const findInsertionPoint = () => {
       const iconSpan = Array.from(document.querySelectorAll('span'))
-        .find(span => span.textContent === '󱥊');
+        .find(span => span.textContent === window.__mbFB.glyphs.headerAnchor);
       const container = iconSpan?.closest('div[role="button"]')?.parentNode;
 
-      const desktopTarget = document.querySelector(
-        '.x6s0dn4.x78zum5.x1s65kcs.x1n2onr6.x1ja2u2z'
-      );
+      const desktopTarget = document.querySelector(window.__mbFB.desktop.headerActions);
 
       return { container, desktopTarget };
     };
@@ -578,7 +614,7 @@ window.onDomChange(() => {
     });
 
     // observer for theme-color changes
-    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    const themeMeta = document.querySelector(window.__mbFB.themeColor);
     if (themeMeta) {
       new MutationObserver(updateButtonColor).observe(themeMeta, {
         attributes: true,
@@ -591,7 +627,7 @@ window.onDomChange(() => {
 
 // Color Extraction Script
 (function() {
-    const meta = document.querySelector('meta[name="theme-color"]');
+    const meta = document.querySelector(window.__mbFB.themeColor);
     const notify = () => window.ThemeBridge?.onThemeColorChanged?.(meta?.content ?? "null");
     if (meta) {
         notify();
@@ -614,4 +650,49 @@ window.onDomChange(() => {
         reader.readAsDataURL(blob);
         return originalCreateObjectURL(blob);
     };
+})();
+
+// Self-check: once the home feed has loaded, verify the Facebook hooks above still match something.
+// Facebook changes break features silently; this names the hook that broke. Results go to
+// window.__mbHealth ({ status: 'pending' | 'ok' | 'failed' | 'skipped', checks, failures }) and failures
+// to console.warn. window.__mbHealth.run() re-checks on demand (tools/feed-audit.js reads it).
+(() => {
+    const FB = window.__mbFB;
+    const CHECKS = {
+        feedItems: () => document.querySelectorAll(FB.feedItem).length > 1,
+        headerTabs: () => (document.querySelector(FB.tablist)?.querySelectorAll(`:scope > ${FB.tab}`).length ?? 0) >= 2,
+        themeColor: () => !!document.querySelector(FB.themeColor)?.getAttribute('content'),
+        logo: () => !!document.querySelector(FB.logoImg),
+        homeGlyph: () => window.isFeed(),
+    };
+    const TIMEOUT = 20000; // after this the feed counts as loaded, whatever is missing
+
+    const health = window.__mbHealth = { status: 'pending', checks: {}, failures: [], run: () => evaluate() };
+    const evaluate = () => {
+        for (const [name, check] of Object.entries(CHECKS)) {
+            try { health.checks[name] = !!check(); } catch (e) { health.checks[name] = false; }
+        }
+        health.failures = Object.keys(CHECKS).filter(name => !health.checks[name]);
+        return health;
+    };
+    const finish = () => {
+        health.status = health.failures.length ? 'failed' : 'ok';
+        health.checkedAt = new Date().toISOString();
+        if (health.failures.length)
+            console.warn('[Materialbook] Facebook hooks not found, features may not work:', health.failures.join(', '));
+    };
+
+    // Only the logged-in mobile home feed has all hooks; the login screen is built with bloks UI
+    if (window.isDesktopMode() || location.pathname !== '/' || document.getElementsByClassName('wbloks_1').length) {
+        health.status = 'skipped';
+        return;
+    }
+
+    const started = Date.now();
+    window.onDomChange(() => {
+        if (health.status !== 'pending') return;
+        if (!evaluate().failures.length || Date.now() - started > TIMEOUT) finish();
+    });
+    // The DOM may go quiet before the timeout; make sure it settles anyway
+    setTimeout(() => { if (health.status === 'pending') { evaluate(); finish(); } }, TIMEOUT + 500);
 })();

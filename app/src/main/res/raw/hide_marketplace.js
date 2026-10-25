@@ -6,6 +6,7 @@
         .map(window.normalizeFeedLabel));
 
     window.addFeedFilter((unit, labels) =>
-        location.pathname === '/' && labels.slice(0, 4).some(text => LABELS.has(text))
+        location.pathname === '/' && labels.slice(0, 4).some(text => LABELS.has(text)),
+        'marketplace'
     );
 })();

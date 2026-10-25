@@ -2,8 +2,8 @@
   const isDesktop = window.isDesktopMode && window.isDesktopMode();
 
   if (isDesktop) {
-    const CONTAINER = 'div.x6ikm8r.x10wlt62';
-    const CHILD = 'div.x6s0dn4.x78zum5.xnpuxes';
+    const CONTAINER = window.__mbFB.desktop.reelsShelf;
+    const CHILD = window.__mbFB.desktop.reelsShelfChild;
 
     const handle = node => {
       if (!(node instanceof HTMLElement)) return;
@@ -20,11 +20,12 @@
     }).observe(document.body, { childList: true, subtree: true });
 
   } else {
-    const ICONS = ['󲀠', '󰣝'];
+    const ICONS = window.__mbFB.glyphs.reels;
 
     // Reels shelves in the feed go through the feed filter, so the feed pill counts them
     window.addFeedFilter(unit =>
-      [...unit.querySelectorAll('.fl.ac .native-text')].some(el => ICONS.includes(el.textContent.trim()))
+      [...unit.querySelectorAll('.fl.ac .native-text')].some(el => ICONS.includes(el.textContent.trim())),
+      'reels'
     );
   }
 })();

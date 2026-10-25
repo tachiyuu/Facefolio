@@ -16,6 +16,7 @@
 
     window.addFeedFilter((unit, labels) =>
         location.pathname === '/' &&
-        labels.slice(0, HEADER_LABELS).some(text => LABELS.has(text))
+        labels.slice(0, HEADER_LABELS).some(text => LABELS.has(text)),
+        'suggested'
     );
 })();

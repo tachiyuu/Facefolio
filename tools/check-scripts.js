@@ -8,7 +8,7 @@ const vm = require('vm');
 
 const ROOT = path.join(__dirname, '..');
 const RAW = path.join(ROOT, 'app/src/main/res/raw');
-const VIEWMODEL = path.join(ROOT, 'app/src/main/java/com/tachiyuu/materialbook/ui/viewmodel/MainViewModel.kt');
+const VIEWMODEL = path.join(ROOT, 'app/src/main/java/com/tachiyuu/facefolio/ui/viewmodel/MainViewModel.kt');
 const problems = [];
 
 // The hooks block at the top of scripts.js, evaluated on its own

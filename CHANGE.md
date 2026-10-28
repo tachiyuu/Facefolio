@@ -1,3 +1,13 @@
+## Facefolio - v1.0.0
+
+* Rebranded and decoupled into **Facefolio** (`com.tachiyuu.facefolio`), an independent, distraction-free Facebook client.
+* Modernized package namespace and code structure into `com.tachiyuu.facefolio`.
+* Removed broken legacy Playwright test suites and credentials remnants from upstream; added fast unit test suite for redirect sanitization and script injection bundling.
+* Restructured data extraction & backup rules (`backup_rules.xml`) to safeguard user preference state without leaking session tokens.
+* Modernized WebView bridge architecture (`FacefolioSettings`) with backward compatibility support.
+* Added native Vietnamese localization (`values-vi/strings.xml`).
+* Verified R8/ProGuard shrinking and resource optimization: release APK weighs only 1.2 MB.
+
 ## Materialbook - v1.1.5
 
 * Fix: with Facebook's dark mode on, the app sometimes loaded a page with its light-mode colours: light Material You accents on dark cards, and AMOLED Black not applied. It now always uses the colours of the theme Facebook shows.
@@ -16,30 +26,3 @@
 ## Materialbook - v1.1.2
 
 First release of this fork, based on eepiemi/Materialbook 1.0.0.
-
-**Feed**
-* One shared feed filter for all hiding features. Ads are detected from their label, including labels Facebook draws as SVG.
-* Suggested posts and People you may know are hidden by default.
-* New settings: hide AI-generated posts (on by default), hide Marketplace suggestions.
-* A "N hidden · Show" line above the feed shows how many posts were hidden and lets you view them.
-
-**Top bar**
-* Pinned tabs: choose which tabs are shown (default Home, Groups, Notifications). Groups is a new tab that opens Your Groups.
-* New settings: hide like & share counts, quiet badges.
-
-**Look**
-* Material You follows Facebook's own light/dark setting, and replacement colours keep the contrast of the colours they replace.
-* AMOLED Black no longer applies on Facebook's light theme.
-* New app icon.
-* Redesigned settings: grouped sections, switches with check/cross marks, a "Show in feed" dialog.
-
-**Fixes**
-* With Sticky Navbar on, the logo bar could be pushed below the tabs.
-* Settings stored in cookies (such as Facebook's dark mode) and logins are saved when the app goes to the background.
-* Google sign-in pages open inside the app.
-* External links no longer get double-encoded.
-
-**Size and performance**
-* Scripts are bundled in the app instead of downloaded from GitHub at runtime; the Ktor network library is removed.
-* Less work per page change in the injected scripts.
-* The WebView no longer uses an extra hardware layer.

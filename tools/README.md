@@ -7,8 +7,8 @@ update you can see in a minute what broke. They need Node 22+ (no npm install) a
 ## Setup
 
 1. Build a debuggable app. WebView inspection is only on in debuggable builds:
-   - the debug build (`./gradlew installDebug`, package `com.tachiyuu.materialbook.test`, a separate app
-     you sign in to once), run the tools with `MB_PACKAGE=com.tachiyuu.materialbook.test`, or
+   - the debug build (`./gradlew installDebug`, package `com.tachiyuu.facefolio.test`, a separate app
+     you sign in to once), run the tools with `FF_PACKAGE=com.tachiyuu.facefolio.test`, or
    - the release build with `isDebuggable = true` added to `buildTypes.release` in
      `app/build.gradle.kts`, installed over the normal app (same signing key, keeps the login).
      **Don't commit that line.**
@@ -24,7 +24,7 @@ update you can see in a minute what broke. They need Node 22+ (no npm install) a
 | `node tools/health-check.js` | **Start here.** Loads the feed in the mobile and the desktop layout (desktop user agent, as the app uses in landscape) and prints the self-check per hook plus any error our scripts logged or threw. `--mobile-only` skips desktop. |
 | `node tools/feed-audit.js` | Scrolls the feed (`--scrolls 20`) and lists every hidden item with the rule that hid it (`ads`, `suggested`, `reels`, `pymk`, `ai`, `marketplace`), plus **visible ads** that slipped through, and the self-check result. `--all` lists shown items too, `--reload` starts from a fresh feed. |
 | `node tools/contrast-audit.js` | Loads feed, notifications, menu and groups (`--pages feed,menu`) and measures every visible text and icon against what is painted behind it: 4.5:1 for text, 3:1 for large text and icons (WCAG AA). Failures are grouped by colour pair with a sample and a short element path. Text over photos is skipped. Run it in each theme you care about (Facebook light/dark, Material You, AMOLED). |
-| `node tools/perf-bench.js` | Scrolls the feed for `--seconds 10` under the CPU profiler and splits main-thread time into ours (the injected bundle, `materialbook-scripts.js`), Facebook's, GC and browser work, plus our hottest functions with their line in the bundle. |
+| `node tools/perf-bench.js` | Scrolls the feed for `--seconds 10` under the CPU profiler and splits main-thread time into ours (the injected bundle, `facefolio-scripts.js`), Facebook's, GC and browser work, plus our hottest functions with their line in the bundle. |
 
 Exit code 2 means the tool found a problem (visible ads, a failed self-check, contrast failures).
 

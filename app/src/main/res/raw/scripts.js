@@ -50,7 +50,7 @@ window.__mbFB = Object.freeze({
     const run = () => {
         scheduled = false;
         callbacks.forEach(fn => {
-            try { fn(); } catch (e) { console.error('[Materialbook]', e); }
+            try { fn(); } catch (e) { console.error('[Facefolio]', e); }
         });
     };
     new MutationObserver(mutations => {
@@ -531,7 +531,7 @@ window.onDomChange(() => {
 })();
 
 
-/* The below scripts are specific to com.tachiyuu.materialbook application. */
+/* The below scripts are specific to com.tachiyuu.facefolio application. */
 
 (() => {
   const onReady = (fn) => {
@@ -691,7 +691,7 @@ window.onDomChange(() => {
         health.status = health.failures.length ? 'failed' : 'ok';
         health.checkedAt = new Date().toISOString();
         if (health.failures.length)
-            console.warn('[Materialbook] Facebook hooks not found, features may not work:', health.failures.join(', '));
+            console.warn('[Facefolio] Facebook hooks not found, features may not work:', health.failures.join(', '));
     };
 
     // Only the logged-in home feed has all hooks; the login screen is built with bloks UI

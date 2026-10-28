@@ -7,15 +7,15 @@ plugins {
 }
 
 android {
-    namespace = "com.tachiyuu.materialbook"
+    namespace = "com.tachiyuu.facefolio"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.tachiyuu.materialbook"
+        applicationId = "com.tachiyuu.facefolio"
         minSdk = 23
         targetSdk = 36
-        versionCode = 19
-        versionName = "1.1.5"
+        versionCode = 1
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

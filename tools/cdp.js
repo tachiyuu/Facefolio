@@ -1,9 +1,9 @@
-// Minimal Chrome DevTools Protocol client for the Materialbook WebView (Node 22+: global fetch and WebSocket).
+// Minimal Chrome DevTools Protocol client for the Facefolio WebView (Node 22+: global fetch and WebSocket).
 // Needs a debuggable build (see README.md) and adb on PATH.
 'use strict';
 const { execFileSync } = require('child_process');
 
-const PACKAGE = process.env.MB_PACKAGE || 'com.tachiyuu.materialbook';
+const PACKAGE = process.env.FF_PACKAGE || 'com.tachiyuu.facefolio';
 const PORT = Number(process.env.MB_PORT || 9333);
 
 const adb = (...args) => execFileSync('adb', args, { encoding: 'utf8' }).trim();

@@ -1,0 +1,52 @@
+<resources>
+    <string name="app_name">Facefolio</string>
+
+    <!-- Bottom Text and Buttons -->
+    <string name="apply_immediately">Áp dụng ngay?</string>
+    <string name="remove_ads_title">Chặn quảng cáo</string>
+    <string name="download_content_title">Tải nội dung</string>
+    <string name="copy_to_clipboard_title">Sao chép vào khay nhớ tạm</string>
+    <string name="desktop_layout_title">Giao diện máy tính</string>
+    <string name="immersive_mode_title">Chế độ toàn màn hình</string>
+    <string name="sticky_navbar_title">Cố định thanh điều hướng</string>
+    <string name="pinch_to_zoom_title">Thu phóng bằng 2 ngón tay</string>
+    <string name="material_you_title">Chủ đề Material You</string>
+    <string name="amoled_black_title">Màu đen AMOLED</string>
+    <string name="customize_feed_title">Tùy chỉnh bảng tin</string>
+    <string name="network_error_title">Kết nối mạng</string>
+    <string name="network_error_description">Để sử dụng Facefolio, vui lòng bật dữ liệu di động hoặc kết nối Wi-Fi.</string>
+    <string name="ok">Đồng ý</string>
+    <string name="retry">Thử lại</string>
+    <string name="saved_to_downloads">Đã lưu vào mục Tải xuống</string>
+    <string name="download_failed_invalid_data">Tải xuống thất bại: Dữ liệu không hợp lệ</string>
+    <string name="failed_to_save_file">Không thể lưu tệp</string>
+    <string name="image_copied_to_clipboard">Đã sao chép ảnh vào khay nhớ tạm</string>
+    <string name="copy_failed_invalid_data">Sao chép thất bại: Dữ liệu không hợp lệ</string>
+    <string name="copy_failed_invalid_image">Sao chép thất bại: Ảnh không hợp lệ</string>
+    <string name="failed_to_copy_image">Không thể sao chép ảnh</string>
+    <string name="clipboard_not_supported">Khay nhớ tạm không được hỗ trợ trên phiên bản này</string>
+    <string name="suggested_posts">Bài viết gợi ý</string>
+    <string name="reels">Reels</string>
+    <string name="stories">Tin</string>
+    <string name="people_you_may_know">Những người bạn có thể biết</string>
+    <string name="groups">Nhóm</string>
+    <string name="show_in_feed_title">Hiển thị trên bảng tin</string>
+    <string name="show_in_feed_hint">Tắt những nội dung bạn không muốn thấy</string>
+    <string name="state_shown">Hiển thị</string>
+    <string name="state_hidden">Đã ẩn</string>
+    <string name="enable_material_you_theming_for_facebook">Bật giao diện màu sắc Material You theo hình nền</string>
+    <string name="enable_pure_black_theme_for_amoled_displays">Bật nền đen thuần cho màn hình AMOLED (cần Chế độ tối)</string>
+    <string name="keep_the_navigation_bar_visible_while_scrolling">Giữ thanh điều hướng luôn hiển thị khi cuộn</string>
+    <string name="hide_system_bars_for_a_fullscreen_experience">Ẩn thanh trạng thái và điều hướng hệ thống</string>
+    <string name="force_desktop_layout_may_not_be_suitable_for_smaller_display">Bắt buộc giao diện máy tính. Không phù hợp màn hình nhỏ.</string>
+    <string name="use_two_fingers_to_zoom_in_or_out">Dùng hai ngón tay để phóng to hoặc thu nhỏ</string>
+    <string name="customize_feed">Hiện hoặc ẩn các mục</string>
+    <string name="hide_sponsored_ads_from_your_feed">Ẩn bài viết tài trợ khỏi bảng tin</string>
+    <string name="enable_download_button_on_media_view">Thêm nút tải xuống khi xem ảnh, video</string>
+    <string name="enable_copy_to_clipboard_button_on_media_view">Thêm nút sao chép ảnh khi xem</string>
+    <string name="facefolio_settings">Cài đặt Facefolio</string>
+    <string name="not_supported">Không hỗ trợ</string>
+    <string name="section_feed">Bảng tin</string>
+    <string name="section_fewer_distractions">Giảm xao nhãng</string>
+    <string name="section_look">Giao diện</string>
+</resources>

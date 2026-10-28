@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Materialbook</string>
+    <string name="app_name">Facefolio</string>
     <string name="apply_immediately">এখনই প্রয়োগ করুন?</string>
     <string name="remove_ads_title">বিজ্ঞাপন বন্ধ করুন</string>
     <string name="download_content_title">কনটেন্ট ডাউনলোড করুন</string>
@@ -11,7 +11,7 @@
     <string name="amoled_black_title">অ্যামোলেড ব্ল্যাক</string>
     <string name="customize_feed_title">ফিড কাস্টমাইজ করুন</string>
     <string name="network_error_title">ইন্টারনেট সংযোগে যুক্ত হোন</string>
-    <string name="network_error_description">Materialbook ব্যবহার করতে, মোবাইল ডেটা চালু করুন বা Wi-Fi এ সংযুক্ত হোন।</string>
+    <string name="network_error_description">Facefolio ব্যবহার করতে, মোবাইল ডেটা চালু করুন বা Wi-Fi এ সংযুক্ত হোন।</string>
     <string name="ok">ঠিক আছে</string>
     <string name="saved_to_downloads">ডাউনলোড সম্পন্ন হয়েছে</string>
     <string name="download_failed_invalid_data">ডাউনলোড ব্যর্থ হয়েছে: ডাটা সঠিক নয়</string>
@@ -29,7 +29,7 @@
     <string name="customize_feed">আইটেম দেখান বা হাইড করুন</string>
     <string name="hide_sponsored_ads_from_your_feed">ফিড থেকে স্পন্সরড বিজ্ঞাপন হাইড করুন</string>
     <string name="enable_download_button_on_media_view">মিডিয়া ভিউ\'তে ডাউনলোড বাটন চালু করুন</string>
-    <string name="materialbook_settings">Materialbook সেটিংস</string>
+    <string name="facefolio_settings">Facefolio সেটিংস</string>
     <string name="copy_to_clipboard_title">ক্লিপবোর্ডে কপি করুন</string>
     <string name="image_copied_to_clipboard">ছবি ক্লিপবোর্ডে কপি করা হয়েছে</string>
     <string name="copy_failed_invalid_data">কপি করা যায়নি: ডেটা সঠিক নয়</string>

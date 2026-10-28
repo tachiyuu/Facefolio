@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Materialbook</string>
+    <string name="app_name">Facefolio</string>
 
     <!-- Bottom Text and Buttons -->
     <string name="apply_immediately">Applica Immediatamente?</string>
@@ -14,7 +14,7 @@
     <string name="amoled_black_title">AMOLED Black</string>
     <string name="customize_feed_title">Personalizza il feed</string>
     <string name="network_error_title">Connettiti a una rete</string>
-    <string name="network_error_description">Per utilizzare Materialbook, attiva i dati mobili o connettiti al Wi-Fi.</string>
+    <string name="network_error_description">Per utilizzare Facefolio, attiva i dati mobili o connettiti al Wi-Fi.</string>
     <string name="ok">OK</string>
     <string name="saved_to_downloads">Salvato nei Download</string>
     <string name="download_failed_invalid_data">Download fallito: dati non validi</string>
@@ -39,6 +39,6 @@
     <string name="hide_sponsored_ads_from_your_feed">Nascondi gli annunci sponsorizzati dal feed</string>
     <string name="enable_download_button_on_media_view">Abilita il pulsante di download nella vista contenuti multimediali</string>
     <string name="enable_copy_to_clipboard_button_on_media_view">Abilita il pulsante \'Copia negli appunti\' nella vista contenuti multimediali</string>
-    <string name="materialbook_settings">Impostazioni Materialbook</string>
+    <string name="facefolio_settings">Impostazioni Facefolio</string>
     <string name="not_supported">Non supportato</string>
 </resources>

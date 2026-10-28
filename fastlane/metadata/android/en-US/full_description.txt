@@ -1,4 +1,4 @@
-Materialbook is a lightweight Facebook client for Android. It wraps the mobile Facebook website in a WebView and changes what it shows with scripts bundled in the app.
+Facefolio is a lightweight Facebook client for Android. It wraps the mobile Facebook website in a WebView and changes what it shows with scripts bundled in the app.
 
 Each feature is a setting:
 <ul>

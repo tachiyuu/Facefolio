@@ -1,12 +1,12 @@
 // Perf benchmark: scrolls the home feed for a while under the CPU profiler and splits the main-thread
-// time into ours (the injected bundle, materialbook-scripts.js) and Facebook's, plus the browser's
+// time into ours (the injected bundle, facefolio-scripts.js) and Facebook's, plus the browser's
 // style/layout/paint work. Lists our hottest functions, which is where a slowdown usually starts.
 // Usage: node tools/perf-bench.js [--seconds 10] [--speed 15] [--top 10] [--reload]
 'use strict';
 const { run, args, sleep } = require('./cdp');
 
 const opts = args({ seconds: 10, speed: 15, top: 10, reload: false });
-const OURS = /materialbook-scripts\.js/;
+const OURS = /facefolio-scripts\.js/;
 
 run(async cdp => {
     if (opts.reload || !/^https:\/\/m\.facebook\.com\/(\?|$)/.test(await cdp.evaluate(() => location.href)))
@@ -90,7 +90,7 @@ run(async cdp => {
     const js = (totals.ours || 0) + (totals.facebook || 0) + (totals.unattributed || 0);
     console.log(`\nOur share of JavaScript time: ${pct(totals.ours || 0, js)}`);
     if (!totals.ours && totals.unattributed)
-        console.log('(No samples carry materialbook-scripts.js; this build predates the sourceURL, so ours is inside "unattributed")');
+        console.log('(No samples carry facefolio-scripts.js; this build predates the sourceURL, so ours is inside "unattributed")');
 
     console.log('\nRenderer work (Performance metrics, includes style/layout our CSS and DOM writes cause)');
     for (const [label, name] of [['script', 'ScriptDuration'], ['style recalc', 'RecalcStyleDuration'], ['layout', 'LayoutDuration'], ['all tasks', 'TaskDuration']])

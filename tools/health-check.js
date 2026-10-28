@@ -14,10 +14,10 @@ run(async cdp => {
     cdp.on('Runtime.consoleAPICalled', p => {
         if (p.type !== 'error' && p.type !== 'warning') return;
         const text = p.args.map(a => a.value ?? a.description).join(' ');
-        if (text.includes('[Materialbook]')) errors.push(text.split('\n')[0].slice(0, 200));
+        if (text.includes('[Facefolio]')) errors.push(text.split('\n')[0].slice(0, 200));
     });
     cdp.on('Runtime.exceptionThrown', ({ exceptionDetails: d }) => {
-        if (/materialbook-scripts/.test(d.url || '')) errors.push(`line ${d.lineNumber + 1}: ${(d.exception?.description || d.text).split('\n')[0]}`);
+        if (/facefolio-scripts/.test(d.url || '')) errors.push(`line ${d.lineNumber + 1}: ${(d.exception?.description || d.text).split('\n')[0]}`);
     });
 
     // The self-check finishes when all hooks match or after its 20 s timeout

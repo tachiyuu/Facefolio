@@ -1,19 +1,34 @@
 package com.tachiyuu.facefolio.ui.viewmodel
 
 import android.content.res.Resources
+import androidx.annotation.RawRes
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.tachiyuu.facefolio.R
 import com.tachiyuu.facefolio.utils.Script
 import com.tachiyuu.facefolio.utils.fetchScripts
-
+import java.util.concurrent.ConcurrentHashMap
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainViewModel(
     resources: Resources,
     settings: SettingsViewModel
 ): ViewModel() {
+
+    companion object {
+        private val rawCache = ConcurrentHashMap<Int, String>()
+
+        fun readRawCached(resources: Resources, @RawRes resId: Int): String {
+            return rawCache.getOrPut(resId) {
+                resources.openRawResource(resId).bufferedReader().use { it.readText() }
+            }
+        }
+    }
 
     private val _themeColor = mutableStateOf(Color.Transparent)
     val themeColor: State<Color> = _themeColor
@@ -22,7 +37,12 @@ class MainViewModel(
     val scripts: State<String?> = _scripts
 
     init {
-        _scripts.value = buildScripts(resources, settings)
+        viewModelScope.launch(Dispatchers.IO) {
+            val bundle = buildScripts(resources, settings)
+            withContext(Dispatchers.Main.immediate) {
+                _scripts.value = bundle
+            }
+        }
     }
 
     fun setThemeColor(color: Color) {
@@ -62,8 +82,7 @@ class MainViewModel(
             fetchScripts(
                 scripts = scripts,
                 fallbackContent = { resId ->
-                    resources.openRawResource(resId).bufferedReader()
-                        .use { it.readText() }
+                    readRawCached(resources, resId)
                 }
             )
     }

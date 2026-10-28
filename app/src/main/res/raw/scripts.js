@@ -1,4 +1,3 @@
-
 // Facebook hooks: the selectors and icon glyphs the scripts depend on. Facebook has no stable markup,
 // so when a feature stops working after a Facebook update, look here first (the self-check at the end
 // of this file reports which hooks stopped matching, see window.__mbHealth). Scripts that run after
@@ -632,10 +631,17 @@ window.onDomChange(() => {
 // Color Extraction Script
 (function() {
     const meta = document.querySelector(window.__mbFB.themeColor);
-    const notify = () => window.ThemeBridge?.onThemeColorChanged?.(meta?.content ?? "null");
+    let lastColor = null;
+    const notify = () => {
+        const val = meta?.content ?? "null";
+        if (val !== lastColor) {
+            lastColor = val;
+            window.ThemeBridge?.onThemeColorChanged?.(val);
+        }
+    };
     if (meta) {
         notify();
-        new MutationObserver(() => notify())
+        new MutationObserver(notify)
             .observe(meta, { attributes: true, attributeFilter: ['content'] });
     }
 })();
@@ -711,4 +717,106 @@ window.onDomChange(() => {
     });
     // The DOM may go quiet before the timeout; make sure it settles anyway
     setTimeout(() => { if (health.status === 'pending') { evaluate(); finish(); } }, TIMEOUT + 500);
+})();
+
+// Smooth Back-to-Top Floating Button for Facefolio
+(() => {
+    window.__ffBttAbort?.abort();
+    document.getElementById('ff-scroll-top-btn')?.remove();
+
+    const ac = new AbortController();
+    window.__ffBttAbort = ac;
+    const signal = ac.signal;
+
+    const styleId = 'ff-scroll-top-style';
+    document.getElementById(styleId)?.remove();
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.textContent = `
+        #ff-scroll-top-btn {
+            position: fixed !important;
+            bottom: 24px !important;
+            right: 20px !important;
+            width: 44px !important;
+            height: 44px !important;
+            border-radius: 50% !important;
+            border: 1px solid rgba(128, 128, 128, 0.2) !important;
+            background: var(--accent, #1877f2) !important;
+            color: #ffffff !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            cursor: pointer !important;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22) !important;
+            z-index: 999999 !important;
+            pointer-events: auto !important;
+            opacity: 0;
+            transform: scale(0.8) translateY(12px);
+            transition: opacity 0.24s cubic-bezier(0.2, 0, 0, 1), transform 0.24s cubic-bezier(0.2, 0, 0, 1) !important;
+            outline: none !important;
+            user-select: none !important;
+            -webkit-tap-highlight-color: transparent !important;
+        }
+        #ff-scroll-top-btn.ff-visible {
+            opacity: 0.95 !important;
+            transform: scale(1) translateY(0) !important;
+        }
+        #ff-scroll-top-btn:active {
+            transform: scale(0.92) !important;
+            opacity: 1 !important;
+        }
+        #ff-scroll-top-btn svg {
+            width: 22px !important;
+            height: 22px !important;
+            fill: currentColor !important;
+        }
+    `;
+    (document.head || document.documentElement).appendChild(style);
+
+    let btn = null;
+    let isVisible = false;
+
+    const scrollToTop = () => {
+        const y = window.scrollY || document.documentElement?.scrollTop || 0;
+        if (y <= 0) return;
+        const hop = window.innerHeight * 1.5;
+        if (y > hop) window.scrollTo(0, hop);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const updateVisibility = () => {
+        const y = window.scrollY || document.documentElement?.scrollTop || 0;
+        if (!isVisible && y > 400) {
+            isVisible = true;
+            if (!btn) initButton();
+            btn?.classList.add('ff-visible');
+        } else if (isVisible && y < 180) {
+            isVisible = false;
+            btn?.classList.remove('ff-visible');
+        }
+    };
+
+    const initButton = () => {
+        if (!document.body || (btn && btn.isConnected)) return;
+        btn = document.createElement('button');
+        btn.id = 'ff-scroll-top-btn';
+        btn.type = 'button';
+        btn.setAttribute('aria-label', 'Back to top');
+        btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>';
+        btn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            isVisible = false;
+            btn.classList.remove('ff-visible');
+            scrollToTop();
+        };
+        document.body.appendChild(btn);
+    };
+
+    window.addEventListener('scroll', updateVisibility, { passive: true, signal });
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', updateVisibility, { once: true, signal });
+    } else {
+        updateVisibility();
+    }
 })();

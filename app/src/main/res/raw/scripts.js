@@ -614,7 +614,10 @@ window.onDomChange(() => {
       return btn;
     };
 
-    const place = () => {
+    // Whether the slot left of the anchor holds another button. Hit-testing forces layout, so it runs on
+    // page changes only; scrolling moves header and slot together and just repositions.
+    let taken = false;
+    const place = (check = false) => {
       let btn = document.getElementById(BUTTON_ID);
 
       if (window.isDesktopMode()) {
@@ -632,15 +635,17 @@ window.onDomChange(() => {
       const top = Math.round(rect.top + (rect.height - SIZE) / 2);
       const left = Math.round(rect.left - SIZE - 8);
       // Same glyph on other pages' headers (Notifications: search beside "mark all read"): never cover a button
-      const taken = document.elementsFromPoint(left + SIZE / 2, top + SIZE / 2)
+      if (check) taken = document.elementsFromPoint(left + SIZE / 2, top + SIZE / 2)
         .some(el => el.id !== BUTTON_ID && !el.closest(`#${BUTTON_ID}`) && el.closest('[role="button"], a, button'));
       if (taken) { if (btn) btn.style.display = 'none'; return; }
       if (!btn) { btn = createButton(); document.body.appendChild(btn); }
+      // Unchanged position: no style write, so no style recalc on every scroll frame
+      if (btn.style.display === 'flex' && btn.style.top === `${top}px` && btn.style.left === `${left}px`) return;
       Object.assign(btn.style, { position: 'fixed', zIndex: '1001', display: 'flex', top: `${top}px`, left: `${left}px` });
     };
 
-    place();
-    window.onDomChange(place);
+    place(true);
+    window.onDomChange(() => place(true));
     let queued = false;
     window.addEventListener('scroll', () => {
       if (queued) return;

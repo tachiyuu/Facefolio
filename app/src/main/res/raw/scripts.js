@@ -259,8 +259,13 @@ window.addEventListener('load', () => {
         }
         /* Our own tab is a row: icon centred both ways */
         ${TABLIST} > #mb-groups-tab#mb-groups-tab {
-            box-sizing: border-box !important; padding: 0 !important;
+            box-sizing: border-box !important; padding: 0 !important; position: relative !important;
             flex-direction: row !important; align-items: center !important; justify-content: center !important;
+        }
+        /* Facebook draws a short line under each tab; ours copies its size and colour (set by apply()) */
+        #mb-groups-tab::after {
+            content: ''; position: absolute; bottom: var(--mb-line-b, 0); left: 50%; transform: translateX(-50%);
+            width: var(--mb-line-w, 0); height: var(--mb-line-h, 0); background: var(--mb-line-c, transparent);
         }
         ${TABLIST} > :not([role="tab"]):not(#mb-groups-tab) {
             flex: 0 0 100% !important;
@@ -331,8 +336,23 @@ window.addEventListener('load', () => {
         if (pins.has('groups') && tabs.length && !document.getElementById('mb-groups-tab')) {
             const plain = tabs.find(tab => tab.getAttribute('aria-selected') === 'false') || tabs[0];
             const glyph = plain.querySelector('.am > .native-text') || plain;
-            // No underline: Facebook's unselected tabs show none (theirs sits below the 48px tab box)
             tabs[0].after(groupsTab(getComputedStyle(glyph).color));
+        }
+
+        // Same underline as Facebook's unselected tabs: their thin bottom line, measured once per Groups tab
+        // (layout reads here would otherwise run on every page change)
+        const groups = tablist.querySelector(':scope > #mb-groups-tab');
+        if (groups && !groups.style.getPropertyValue('--mb-line-c')) {
+            const sample = tabs.find(tab => tab.getAttribute('aria-selected') === 'false' && tab.offsetWidth);
+            const line = sample && [...sample.querySelectorAll('*')].find(el => el.offsetHeight > 0 && el.offsetHeight <= 4);
+            if (line) {
+                groups.style.setProperty('--mb-line-w', `${line.offsetWidth}px`);
+                groups.style.setProperty('--mb-line-h', `${line.offsetHeight}px`);
+                groups.style.setProperty('--mb-line-c', getComputedStyle(line).backgroundColor);
+                // Facebook's line sits just below the tab box, not inside it
+                const gap = sample.getBoundingClientRect().bottom - line.getBoundingClientRect().bottom;
+                groups.style.setProperty('--mb-line-b', `${Math.round(gap)}px`);
+            }
         }
     }
 

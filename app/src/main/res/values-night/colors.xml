@@ -2,4 +2,7 @@
 <resources>
     <color name="ic_launcher_foreground">#ff9FD3CB</color>
     <color name="ic_launcher_background">#ff0E1A19</color>
+    <color name="splash_background">#FF141218</color>
+    <color name="splash_icon_background">#FF4F378B</color>
+    <color name="splash_icon">#FFEADDFF</color>
 </resources>

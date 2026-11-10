@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Facefolio Design</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ───────────────── Page chrome (not the app) ───────────────── */
+:root{
+  --page:#f4f2ee;--ink:#17161a;--ink2:#5d5a63;--rule:#dedad3;--card:#fffdfa;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+  --emph:cubic-bezier(.2,0,0,1);--decel:cubic-bezier(.05,.7,.1,1);--accel:cubic-bezier(.3,0,.8,.15);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--page:#111013;--ink:#ecebef;--ink2:#9a97a1;--rule:#2a2830;--card:#18171b}}
+:root[data-theme="dark"]{--page:#111013;--ink:#ecebef;--ink2:#9a97a1;--rule:#2a2830;--card:#18171b}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--page);color:var(--ink);font:400 15px/1.55 "Be Vietnam Pro",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+header.top{padding:56px 0 8px}
+.eyebrow{font:500 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink2)}
+h1{font-size:clamp(34px,5vw,56px);font-weight:600;letter-spacing:-.025em;line-height:1.04;margin:14px 0 14px}
+.lede{max-width:640px;color:var(--ink2);font-size:17px}
+section{padding:56px 0;border-top:1px solid var(--rule)}
+section:first-of-type{border-top:0}
+h2{font-size:26px;font-weight:600;letter-spacing:-.015em;margin-bottom:6px}
+.h2sub{color:var(--ink2);max-width:680px;margin-bottom:32px}
+.mono{font-family:var(--mono);font-size:12px}
+
+/* controls */
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:28px 0 0}
+.seg{display:inline-flex;background:var(--card);border:1px solid var(--rule);border-radius:999px;padding:3px}
+.seg button{border:0;background:none;color:var(--ink2);font:500 13px "Be Vietnam Pro";padding:7px 14px;border-radius:999px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--page)}
+.sw8{width:22px;height:22px;border-radius:50%;border:2px solid var(--card);outline:1px solid var(--rule);cursor:pointer;padding:0}
+.sw8[aria-pressed="true"]{outline:2px solid var(--ink)}
+.btnp{border:0;background:var(--ink);color:var(--page);font:600 13px "Be Vietnam Pro";padding:9px 16px;border-radius:999px;cursor:pointer;display:inline-flex;gap:8px;align-items:center}
+.chk{display:inline-flex;gap:8px;align-items:center;font-size:13px;color:var(--ink2);cursor:pointer;user-select:none}
+
+/* hero layout */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:56px;align-items:center}
+@media (max-width:860px){.hero{grid-template-columns:1fr}.hero .stage{justify-self:center}}
+.timeline{list-style:none;display:grid;gap:2px;margin-top:28px;max-width:520px}
+.timeline li{display:grid;grid-template-columns:76px 1fr;gap:16px;padding:12px 14px;border-radius:14px;transition:background .25s}
+.timeline li.on{background:var(--card)}
+.timeline b{font-weight:600;font-size:14px}
+.timeline span{display:block;color:var(--ink2);font-size:13px}
+.timeline .t{font:500 12px/20px var(--mono);color:var(--ink2)}
+.timeline li.on .t{color:var(--ink)}
+
+/* ───────────────── Device ───────────────── */
+.device{--w:330px;width:var(--w);aspect-ratio:9/19.5;border-radius:46px;padding:9px;background:#0d0d0f;box-shadow:0 0 0 1px #2c2c30 inset,0 30px 60px -20px #0006,0 12px 24px -12px #0004;position:relative;flex:none}
+.device.sm{--w:252px;border-radius:34px;padding:7px}
+.screen{position:absolute;inset:9px;border-radius:38px;overflow:hidden;background:var(--bg);color:var(--on);font-family:"Be Vietnam Pro";isolation:isolate}
+.device.sm .screen{inset:7px;border-radius:28px}
+.sbar{position:absolute;top:0;left:0;right:0;height:34px;display:flex;justify-content:space-between;align-items:center;padding:0 22px 0 26px;font:600 12px "Be Vietnam Pro";color:var(--on);z-index:20}
+.sbar i{width:16px;height:9px;border-radius:2px;border:1.5px solid currentColor;display:inline-block;position:relative;opacity:.9}
+.sbar .cam{position:absolute;left:50%;top:10px;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:#000}
+.device.sm .sbar{transform:scale(.763);transform-origin:top left;width:131%}
+.gest{position:absolute;bottom:7px;left:50%;width:108px;height:4px;margin-left:-54px;border-radius:2px;background:var(--on);opacity:.35;z-index:20}
+.app{position:absolute;inset:0}
+.device.sm .app{transform:scale(.763);transform-origin:top left;width:131%;height:131%}
+
+/* ───────────────── App tokens (M3 tonal) — set by JS from seed ───────────────── */
+.app,.screen{font-size:14px}
+svg.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* ───── Splash ───── */
+.splash{position:absolute;inset:0;background:var(--bg);display:grid;place-items:center;z-index:10}
+.mark-wrap{position:relative;width:160px;height:160px;display:grid;place-items:center}
+/* Frame 0 equals the Android 12 system splash: launcher icon inside a 160dp circle mask. */
+.tile{position:absolute;width:160px;height:160px;border-radius:80px;background:var(--pc);transform:scale(.62);
+  transition:border-radius .52s var(--emph),transform .52s var(--emph),background .4s}
+.mark{position:relative;width:108px;height:108px;color:var(--on-pc);transform:scale(.62);transition:transform .52s var(--emph)}
+.mark path{fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
+.mark .shine{stroke:url(#shineGrad);opacity:0}
+.word{position:absolute;top:calc(50% + 74px);left:0;right:0;text-align:center;opacity:0;transform:translateY(8px);transition:opacity .36s var(--decel) .14s,transform .48s var(--decel) .14s}
+.word b{display:block;font-size:22px;font-weight:600;letter-spacing:-.01em;color:var(--on)}
+.word span{display:block;font-size:13px;color:var(--onv);margin-top:2px;letter-spacing:.01em}
+.hair{position:absolute;left:50%;bottom:76px;width:96px;height:3px;margin-left:-48px;border-radius:2px;background:var(--schh);overflow:hidden;opacity:0;transition:opacity .3s}
+.hair i{position:absolute;inset:0;width:36%;border-radius:2px;background:var(--p);animation:indet 1.4s var(--emph) infinite}
+@keyframes indet{0%{transform:translateX(-110%)}100%{transform:translateX(290%)}}
+
+/* settled state (t ≥ 120 ms) */
+.s-settle .tile{border-radius:36px;transform:scale(.7)}
+.s-settle .mark{transform:scale(.6)}
+.s-settle .word{opacity:1;transform:none}
+/* waiting state: a slow specular sweep across the strokes — motion that says "alive" without saying "busy" */
+.s-wait .mark .shine{opacity:1;animation:sweep 2.4s var(--emph) infinite}
+@keyframes sweep{0%{stroke-dashoffset:1.4}100%{stroke-dashoffset:-1.4}}
+.s-slow .hair{opacity:1}
+/* exit: content is revealed through a circle growing from the mark; the mark recedes */
+.s-exit .tile,.s-exit .mark{transform:scale(.5);opacity:0;transition:transform .42s var(--accel),opacity .2s linear}
+.s-exit .word,.s-exit .hair{opacity:0;transition:opacity .15s linear}
+.content{position:absolute;inset:0;clip-path:circle(0% at 50% 50%);z-index:11;pointer-events:none}
+.s-exit+.content,.content.shown{clip-path:circle(150% at 50% 50%);transition:clip-path .62s var(--decel) .06s}
+.reduce .tile,.reduce .mark,.reduce .word{transition-duration:0s!important}
+.reduce .content{clip-path:none!important;opacity:0}
+.reduce .content.shown,.reduce .s-exit+.content{opacity:1;transition:opacity .2s linear!important}
+.reduce .shine{animation:none!important}
+
+/* ───── Feed (WebView) ───── */
+.feed{position:absolute;inset:0;background:var(--sl);padding-top:34px;overflow:hidden}
+.fhead{background:var(--sc);padding:4px 14px 0}
+.ftop{height:44px;display:flex;align-items:center;gap:6px}
+.ftop .wm{font-weight:700;font-size:21px;letter-spacing:-.02em;color:var(--p);flex:1}
+.ib{width:36px;height:36px;border-radius:18px;display:grid;place-items:center;color:var(--on);background:var(--sch)}
+.ib svg{width:20px;height:20px}
+.ftabs{display:flex;height:46px}
+.ftabs div{flex:1;display:grid;place-items:center;color:var(--onv);position:relative}
+.ftabs svg{width:22px;height:22px}
+.ftabs .a{color:var(--p)}
+.ftabs .a:after{content:"";position:absolute;bottom:0;left:30%;right:30%;height:3px;border-radius:3px 3px 0 0;background:var(--p)}
+.composer{background:var(--sc);margin-top:6px;padding:10px 14px;display:flex;gap:10px;align-items:center}
+.av{width:36px;height:36px;border-radius:50%;background:linear-gradient(140deg,var(--pc),var(--schh));flex:none}
+.field{flex:1;height:36px;border-radius:18px;background:var(--sch);display:flex;align-items:center;padding:0 14px;color:var(--onv);font-size:13px}
+.peek{display:flex;justify-content:center;padding:10px 0 4px}
+.peek span{font-size:12px;color:var(--onv);background:var(--sch);border-radius:16px;padding:6px 12px}
+.peek b{color:var(--p);font-weight:600;margin-left:4px}
+.post{background:var(--sc);margin-top:6px;padding:12px 14px}
+.ph{display:flex;gap:10px;align-items:center}
+.ln{height:8px;border-radius:4px;background:var(--schh)}
+.media{height:150px;border-radius:14px;margin:10px 0;background:linear-gradient(160deg,var(--pc) 0%,var(--schh) 70%)}
+.acts{display:flex;gap:8px}.acts div{flex:1;height:34px;border-radius:17px;background:var(--sch);display:grid;place-items:center;color:var(--onv)}
+.acts svg{width:18px;height:18px}
+.fab{position:absolute;right:16px;bottom:26px;width:52px;height:52px;border-radius:16px;background:var(--pc);color:var(--on-pc);display:grid;place-items:center;box-shadow:0 3px 8px -2px #0003,0 6px 18px -6px #0003}
+
+/* ───── Settings ───── */
+.set{position:absolute;inset:0;background:var(--bg);padding-top:34px;overflow:hidden}
+.lbar{padding:4px 8px 0}
+.lbar .nav{height:48px;display:flex;align-items:center;justify-content:space-between}
+.lbar h3{font-size:28px;font-weight:600;letter-spacing:-.015em;line-height:36px;padding:8px 16px 18px}
+.sec{font-size:12px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;color:var(--p);padding:14px 28px 8px}
+.grp{padding:0 14px;display:flex;flex-direction:column;gap:2px}
+.it{display:flex;align-items:center;gap:14px;background:var(--sc);padding:12px 16px 12px 14px;min-height:68px;border-radius:4px}
+.grp .it:first-child{border-radius:24px 24px 4px 4px}.grp .it:last-child{border-radius:4px 4px 24px 24px}.grp .it:only-child{border-radius:24px}
+.lead{width:40px;height:40px;border-radius:12px;background:var(--sch);color:var(--onv);display:grid;place-items:center;flex:none;transition:background .2s,color .2s}
+.lead svg{width:20px;height:20px}
+.it.on .lead{background:var(--pc);color:var(--on-pc)}
+.tx{flex:1;min-width:0}.tx b{display:block;font-size:15px;font-weight:500;line-height:20px}.tx span{display:block;font-size:13px;line-height:18px;color:var(--onv)}
+.tg{width:52px;height:32px;border-radius:16px;border:2px solid var(--out);background:var(--schh);position:relative;flex:none;transition:background .2s,border-color .2s;cursor:pointer}
+.tg i{position:absolute;top:50%;left:6px;width:16px;height:16px;margin-top:-8px;border-radius:50%;background:var(--out);transition:all .25s var(--emph);display:grid;place-items:center}
+.tg.on{background:var(--p);border-color:var(--p)}
+.tg.on i{left:22px;width:24px;height:24px;margin-top:-12px;background:var(--on-p);color:var(--p)}
+.tg.on i:after{content:"";width:10px;height:6px;border-left:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg) translate(1px,-1px)}
+.pill{font-size:12px;font-weight:600;color:var(--on-sc);background:var(--sec-c);border-radius:8px;padding:3px 8px;white-space:nowrap}
+.chev{width:20px;height:20px;color:var(--onv)}
+.health{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--onv)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--good)}
+.toast{position:absolute;left:14px;right:14px;bottom:24px;background:var(--inv);color:var(--inv-on);border-radius:16px;display:flex;align-items:center;gap:10px;padding:6px 6px 6px 16px;font-size:14px;box-shadow:0 8px 24px -8px #0006;transform:translateY(140%);transition:transform .45s var(--decel)}
+.toast.up{transform:none}
+.toast button{margin-left:auto;border:0;background:none;color:var(--inv-p);font:600 14px "Be Vietnam Pro";padding:10px 14px;border-radius:12px;cursor:pointer}
+
+/* ───── Bottom sheet ───── */
+.scrim{position:absolute;inset:0;background:#000;opacity:.32}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--sl);border-radius:28px 28px 0 0;padding:8px 0 22px}
+.grab{width:32px;height:4px;border-radius:2px;background:var(--onv);opacity:.4;margin:8px auto 14px}
+.sheet h4{font-size:22px;font-weight:600;padding:0 24px;letter-spacing:-.01em}
+.sheet p{font-size:13px;color:var(--onv);padding:4px 24px 12px}
+.sheet .it{background:none;border-radius:0!important;min-height:60px;padding:8px 24px}
+.sheet .foot{display:flex;justify-content:flex-end;padding:10px 20px 0}
+.tb{height:40px;padding:0 20px;border-radius:20px;display:inline-grid;place-items:center;font-weight:600;font-size:14px}
+.tb.fill{background:var(--p);color:var(--on-p)}.tb.text{color:var(--p)}.tb.tonal{background:var(--sec-c);color:var(--on-sc)}
+
+/* ───── Offline ───── */
+.off{position:absolute;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 36px}
+.off .glyph{width:96px;height:96px;border-radius:32px;background:var(--sec-c);color:var(--on-sc);display:grid;place-items:center;margin-bottom:24px}
+.off .glyph svg{width:40px;height:40px;stroke-width:1.5}
+.off h4{font-size:24px;font-weight:600;letter-spacing:-.015em;line-height:30px}
+.off p{font-size:14px;color:var(--onv);margin:8px 0 28px;line-height:21px}
+.off .row2{display:flex;gap:8px}
+
+/* grids & cards */
+.screens{display:grid;grid-template-columns:repeat(auto-fit,minmax(262px,1fr));gap:40px 24px;justify-items:center}
+figure{display:flex;flex-direction:column;gap:16px;align-items:center;max-width:340px}
+figcaption{font-size:13px;color:var(--ink2);text-align:left;width:100%}
+figcaption b{display:block;color:var(--ink);font-weight:600;font-size:14px;margin-bottom:2px}
+.board{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:20px}
+.frame{display:flex;flex-direction:column;gap:10px}
+.mini{aspect-ratio:312/676;border-radius:22px;overflow:hidden;position:relative;background:var(--bg);border:1px solid var(--rule)}
+.mini-in{position:absolute;top:0;left:0;width:312px;height:676px;transform-origin:top left}
+.mini *{transition:none!important;animation-play-state:paused!important}
+.frame .t{font:500 12px var(--mono)}
+.frame b{font-size:13px;font-weight:600}.frame span{font-size:12px;color:var(--ink2)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:12px 12px 12px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font:500 11px var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--ink2)}
+td code,.note code{font:500 12px var(--mono);background:var(--card);border:1px solid var(--rule);padding:1px 6px;border-radius:6px}
+.tablewrap{overflow-x:auto}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.note{background:var(--card);border:1px solid var(--rule);border-radius:20px;padding:20px 22px}
+.note h4{font-size:15px;font-weight:600;margin-bottom:6px}
+.note p{font-size:13px;color:var(--ink2)}
+.curve{display:flex;gap:18px;flex-wrap:wrap;margin-top:24px}
+.curve figure{align-items:flex-start;gap:6px}
+.curve svg{width:150px;height:110px;background:var(--card);border:1px solid var(--rule);border-radius:14px}
+footer{padding:40px 0 64px;color:var(--ink2);font-size:13px;border-top:1px solid var(--rule)}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="shineGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".85"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7.5 3v5.4c0 4.4-3.1 8.2-7.5 9.6-4.4-1.4-7.5-5.2-7.5-9.6V6z"/><path d="M9 12l2 2 4-4"/></symbol>
+    <symbol id="i-eyeoff" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 6.1c.5-.1.9-.1 1.4-.1 5 0 8.4 4 9.5 6-.5.9-1.4 2.2-2.7 3.4M6.6 7.6C4.6 8.9 3.2 10.7 2.5 12c1.1 2 4.5 6 9.5 6 1.6 0 3-.4 4.3-1M9.9 9.9a3 3 0 0 0 4.2 4.2"/></symbol>
+    <symbol id="i-tune" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M15 4.5v5M4 17h3M11 17h9M9 14.5v5"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15zM10 21h4"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M9 3.5h6M10 3.5v6L7 13h10l-3-3.5v-6M12 13v7.5"/></symbol>
+    <symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18c1.2 0 1.6-.8 1.6-1.6 0-1-.8-1.3-.8-2.3s.8-1.6 1.7-1.6H17a4 4 0 0 0 4-4c0-4.7-4-8.5-9-8.5z"/><circle cx="7.5" cy="11.5" r="1"/><circle cx="10" cy="7.5" r="1"/><circle cx="14.5" cy="7.5" r="1"/></symbol>
+    <symbol id="i-contrast" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17a8.5 8.5 0 0 0 0-17z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-stick" viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="17" rx="3"/><path d="M4 8.5h16"/></symbol>
+    <symbol id="i-full" viewBox="0 0 24 24"><path d="M4 9V5.5A1.5 1.5 0 0 1 5.5 4H9M15 4h3.5A1.5 1.5 0 0 1 20 5.5V9M20 15v3.5a1.5 1.5 0 0 1-1.5 1.5H15M9 20H5.5A1.5 1.5 0 0 1 4 18.5V15"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="11.5" height="11.5" rx="2.5"/><path d="M15.5 8.5V6A2 2 0 0 0 13.5 4H6a2 2 0 0 0-2 2v7.5a2 2 0 0 0 2 2h2.5"/></symbol>
+    <symbol id="i-desk" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="12" rx="2"/><path d="M8.5 20h7M12 16.5V20"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9.5 6l6 6-6 6"/></symbol>
+    <symbol id="i-offline" viewBox="0 0 24 24"><path d="M3 3l18 18M8.6 16.4a4.8 4.8 0 0 1 6.8 0M5.2 13a9.7 9.7 0 0 1 4.6-2.6M14.6 10.5a9.7 9.7 0 0 1 4.2 2.5M2 9.4a14.6 14.6 0 0 1 4.3-2.8M11 5.6a14.6 14.6 0 0 1 11 3.8"/><circle cx="12" cy="19.5" r=".6" fill="currentColor"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 10.5L12 4l8 6.5V20h-5.5v-5.5h-5V20H4z"/></symbol>
+    <symbol id="i-people" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16.5 14a5 5 0 0 1 5 5.5"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4.5 5h15a1 1 0 0 1 1 1v9.5a1 1 0 0 1-1 1H9l-4.5 3.5z"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="3.5"/><path d="M10 9l5 3-5 3z"/></symbol>
+    <symbol id="i-group" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><circle cx="5.5" cy="10" r="2.2"/><circle cx="18.5" cy="10" r="2.2"/><path d="M6.5 19c.5-3 2.7-4.8 5.5-4.8s5 1.8 5.5 4.8M2 18c.3-2 1.6-3.4 3.4-3.6M22 18c-.3-2-1.6-3.4-3.4-3.6"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.4-4.4"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
+    <symbol id="i-like" viewBox="0 0 24 24"><path d="M7 10.5V20H4.5v-9.5zM7 10.5L11 4c1.4 0 2.4 1.2 2.1 2.6L12.5 10h5.6a2 2 0 0 1 2 2.4l-1.3 6A2 2 0 0 1 16.8 20H7"/></symbol>
+    <symbol id="i-comment" viewBox="0 0 24 24"><path d="M20 12a8 8 0 0 1-11.6 7.1L4 20l1-4.1A8 8 0 1 1 20 12z"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><path d="M14 5l6 6-6 6M20 11H10a6 6 0 0 0-6 6v1"/></symbol>
+    <symbol id="i-reels" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M3.5 8.5h17M8 3.5l3 5M13.5 3.5l3 5M10.5 12l4 2.5-4 2.5z"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3.5l1.9 5.2 5.1 1.8-5.1 1.9L12 17.5l-1.9-5.1L5 10.5l5.1-1.8zM18.5 15.5l.8 2 2 .8-2 .7-.8 2.1-.7-2.1-2.1-.7 2.1-.8z"/></symbol>
+    <symbol id="i-addp" viewBox="0 0 24 24"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 20a6.5 6.5 0 0 1 11.5-4.1M19 14v6M16 17h6"/></symbol>
+    <symbol id="i-story" viewBox="0 0 24 24"><rect x="6" y="3.5" width="12" height="17" rx="3"/><path d="M3 6.5v11M21 6.5v11"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  </defs>
+</svg>
+
+<template id="t-mark">
+  <svg class="mark" viewBox="0 0 108 108" aria-hidden="true">
+    <path d="M32 68V47a11 11 0 0 1 22 0v21M54 47a11 11 0 0 1 22 0v21" stroke-width="7"/>
+    <path d="M28 76c9-4 17-4 26 0c9-4 17-4 26 0" stroke-width="5"/>
+    <path class="shine" pathLength="1" stroke-dasharray=".4 1.6" d="M32 68V47a11 11 0 0 1 22 0v21M54 47a11 11 0 0 1 22 0v21" stroke-width="7"/>
+    <path class="shine" pathLength="1" stroke-dasharray=".4 1.6" d="M28 76c9-4 17-4 26 0c9-4 17-4 26 0" stroke-width="5"/>
+  </svg>
+</template>
+
+<template id="t-splash">
+  <div class="splash"><div class="mark-wrap"><div class="tile"></div><!--mark--></div>
+    <div class="word"><b>Facefolio</b><span>Social, without the noise</span></div>
+    <div class="hair"><i></i></div></div>
+</template>
+
+<template id="t-feed">
+  <div class="feed">
+    <div class="fhead">
+      <div class="ftop"><span class="wm">facefolio</span>
+        <span class="ib"><svg class="i"><use href="#i-tune"/></svg></span>
+        <span class="ib"><svg class="i"><use href="#i-search"/></svg></span>
+        <span class="ib"><svg class="i"><use href="#i-menu"/></svg></span></div>
+      <div class="ftabs"><div class="a"><svg class="i"><use href="#i-home"/></svg></div><div><svg class="i"><use href="#i-group"/></svg></div><div><svg class="i"><use href="#i-people"/></svg></div><div><svg class="i"><use href="#i-chat"/></svg></div><div><svg class="i"><use href="#i-bell"/></svg></div></div>
+    </div>
+    <div class="composer"><div class="av"></div><div class="field">What’s on your mind?</div></div>
+    <div class="peek"><span>7 hidden<b>Show</b></span></div>
+    <div class="post"><div class="ph"><div class="av"></div><div style="flex:1;display:grid;gap:6px"><div class="ln" style="width:52%"></div><div class="ln" style="width:28%;opacity:.6"></div></div></div>
+      <div class="ln" style="width:92%;margin-top:12px"></div><div class="ln" style="width:70%;margin-top:7px"></div>
+      <div class="media"></div>
+      <div class="acts"><div><svg class="i"><use href="#i-like"/></svg></div><div><svg class="i"><use href="#i-comment"/></svg></div><div><svg class="i"><use href="#i-share"/></svg></div></div></div>
+    <div class="post"><div class="ph"><div class="av"></div><div style="flex:1;display:grid;gap:6px"><div class="ln" style="width:40%"></div><div class="ln" style="width:22%;opacity:.6"></div></div></div><div class="media"></div></div>
+    <div class="fab"><svg class="i"><use href="#i-up"/></svg></div>
+  </div>
+</template>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">Facefolio · Design spec v2 · Material 3</div>
+  <h1>Quiet by design.<br>Precise by construction.</h1>
+  <p class="lede">Facefolio exists to remove noise from Facebook, so its own interface has to be the calmest thing on screen: tonal surfaces instead of shadows, one accent colour from Material You, and motion that only ever explains what just happened.</p>
+  <div class="controls" role="group" aria-label="Preview controls">
+    <div class="seg" id="mode"><button aria-pressed="true" data-v="light">Light</button><button aria-pressed="false" data-v="dark">Dark</button></div>
+    <div style="display:flex;gap:8px" id="seeds" aria-label="Wallpaper seed colour"></div>
+    <label class="chk"><input type="checkbox" id="slow"> Slow network</label>
+    <label class="chk"><input type="checkbox" id="rm"> Reduced motion</label>
+  </div>
+</header>
+
+<section>
+  <div class="hero">
+    <div>
+      <h2>Launch sequence</h2>
+      <p class="h2sub">The first frame is the Android 12 system splash, pixel for pixel. Nothing jumps, nothing is redrawn: the icon simply settles, the name arrives, and the feed opens out of the mark once Facebook has actually painted — not when a timer says so.</p>
+      <button class="btnp" id="replay"><svg class="i" style="width:18px;height:18px"><path d="M4 12a8 8 0 1 0 2.3-5.7M4 4.5v4.5h4.5"/></svg>Replay launch</button>
+      <ol class="timeline" id="tl">
+        <li data-p="0"><span class="t">0 ms</span><div><b>System handoff</b><span>Icon in a 160 dp circle on <code>surface</code> — identical to the OS splash, so the switch to Compose is invisible.</span></div></li>
+        <li data-p="1"><span class="t">120 ms</span><div><b>Settle</b><span>Circle morphs to a 36 dp squircle, icon scales 0.62 → 0.60, wordmark rises 8 dp. 520 ms, emphasized.</span></div></li>
+        <li data-p="2"><span class="t">640 ms →</span><div><b>Alive, not busy</b><span>A slow specular sweep along the strokes. A hairline progress only appears if loading passes 1.2 s, so fast launches never flash a bar.</span></div></li>
+        <li data-p="3"><span class="t">ready</span><div><b>Reveal</b><span>On WebView’s first visual-state callback the mark recedes and the feed opens in a circle from its centre. 620 ms, emphasized decelerate.</span></div></li>
+      </ol>
+    </div>
+    <div class="stage"><div class="device" id="heroDev"><div class="screen"><div class="sbar"><span>9:41</span><span class="cam"></span><span><i></i></span></div><div class="app" id="heroApp"></div><div class="gest"></div></div></div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Storyboard</h2>
+  <p class="h2sub">Key frames at their real timings. Each one is the same component in a different state, so what you see here is what Compose renders.</p>
+  <div class="board" id="board"></div>
+  <div class="curve">
+    <figure><svg viewBox="0 0 150 110"><path d="M15 95C45 95 45 15 135 15" fill="none" stroke="currentColor" stroke-width="2"/></svg><span class="mono">emphasized · (.2,0,0,1)</span></figure>
+    <figure><svg viewBox="0 0 150 110"><path d="M15 95C21 39 30 15 135 15" fill="none" stroke="currentColor" stroke-width="2"/></svg><span class="mono">decelerate · (.05,.7,.1,1)</span></figure>
+    <figure><svg viewBox="0 0 150 110"><path d="M15 95C51 95 111 83 135 15" fill="none" stroke="currentColor" stroke-width="2"/></svg><span class="mono">accelerate · (.3,0,.8,.15)</span></figure>
+  </div>
+</section>
+
+<section>
+  <h2>Motion spec</h2>
+  <p class="h2sub">Every value is a token. Durations follow M3 (short 4 = 200 ms, medium 2 = 300 ms, long 2 = 500 ms) and scale with the system animator duration setting.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Element</th><th>Property</th><th>From → To</th><th>Duration</th><th>Easing</th><th>Trigger</th></tr></thead>
+    <tbody>
+      <tr><td>Tile</td><td>corner radius</td><td>80 → 36 dp</td><td>520 ms</td><td>emphasized</td><td>first Compose frame</td></tr>
+      <tr><td>Tile, mark</td><td>scale</td><td>0.62 → 0.70 / 0.60</td><td>520 ms</td><td>emphasized</td><td>first Compose frame</td></tr>
+      <tr><td>Wordmark</td><td>alpha, translateY</td><td>0 → 1, 8 → 0 dp</td><td>360 / 480 ms, +140 ms</td><td>decelerate</td><td>first Compose frame</td></tr>
+      <tr><td>Shine</td><td>dash offset</td><td>loop</td><td>2400 ms</td><td>emphasized</td><td>t ≥ 640 ms and not ready</td></tr>
+      <tr><td>Hairline</td><td>alpha</td><td>0 → 1</td><td>300 ms</td><td>linear</td><td>t ≥ 1200 ms and not ready</td></tr>
+      <tr><td>Mark</td><td>scale, alpha</td><td>→ 0.5, → 0</td><td>420 / 200 ms</td><td>accelerate</td><td><code>postVisualStateCallback</code></td></tr>
+      <tr><td>Content</td><td>circular clip</td><td>0 → 150 %</td><td>620 ms, +60 ms</td><td>decelerate</td><td><code>postVisualStateCallback</code></td></tr>
+      <tr><td>All</td><td>reduced motion</td><td>cross-fade only</td><td>200 ms</td><td>linear</td><td><code>ANIMATOR_DURATION_SCALE = 0</code></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2>Screens</h2>
+  <p class="h2sub">Native surfaces wear the Material You palette. Change the seed and theme above — every screen re-derives from the same twelve tokens.</p>
+  <div class="screens">
+    <figure>
+      <div class="device sm"><div class="screen"><div class="sbar"><span>9:41</span><span class="cam"></span><span><i></i></span></div><div class="app" data-tpl="feed"></div><div class="gest"></div></div></div>
+      <figcaption><b>Feed</b>Facebook’s own page, restyled only through stable hooks (<code>role</code>, <code>aria-*</code>). Settings sits inside the header’s flex row instead of being pinned at a guessed offset.</figcaption>
+    </figure>
+    <figure>
+      <div class="device sm"><div class="screen"><div class="sbar"><span>9:41</span><span class="cam"></span><span><i></i></span></div>
+        <div class="app"><div class="set">
+          <div class="lbar"><div class="nav"><span class="ib" style="background:none"><svg class="i"><use href="#i-back"/></svg></span><span class="health"><span class="dot"></span>Compatible</span></div><h3>Settings</h3></div>
+          <div class="sec">Feed</div>
+          <div class="grp">
+            <div class="it on" data-tg><div class="lead"><svg class="i"><use href="#i-shield"/></svg></div><div class="tx"><b>Block ads</b><span>Hide sponsored posts</span></div><div class="tg on"><i></i></div></div>
+            <div class="it" data-tg><div class="lead"><svg class="i"><use href="#i-eyeoff"/></svg></div><div class="tx"><b>Hide counts</b><span>No like or comment numbers</span></div><div class="tg"><i></i></div></div>
+            <div class="it on"><div class="lead"><svg class="i"><use href="#i-tune"/></svg></div><div class="tx"><b>Feed filters</b><span>Reels, suggested posts</span></div><span class="pill">2 hidden</span><svg class="i chev"><use href="#i-chev"/></svg></div>
+          </div>
+          <div class="sec">Appearance</div>
+          <div class="grp">
+            <div class="it on" data-tg><div class="lead"><svg class="i"><use href="#i-palette"/></svg></div><div class="tx"><b>Material You</b><span>Colours from your wallpaper</span></div><div class="tg on"><i></i></div></div>
+            <div class="it" data-tg><div class="lead"><svg class="i"><use href="#i-contrast"/></svg></div><div class="tx"><b>AMOLED black</b><span>True black in dark theme</span></div><div class="tg"><i></i></div></div>
+          </div>
+          <div class="toast"><span>Settings saved</span><button>Reload</button></div>
+        </div></div><div class="gest"></div></div></div>
+      <figcaption><b>Settings</b>Large title that collapses on scroll. Grouped rows with 24/4 dp corners. A live compatibility indicator reports the in-page self-check. Tap a switch — the snackbar offers a reload only when one is needed.</figcaption>
+    </figure>
+    <figure>
+      <div class="device sm"><div class="screen"><div class="sbar"><span>9:41</span><span class="cam"></span><span><i></i></span></div>
+        <div class="app"><div class="set"><div class="lbar"><div class="nav"></div><h3>Settings</h3></div></div>
+          <div class="scrim"></div>
+          <div class="sheet"><div class="grab"></div><h4>Feed filters</h4><p>Choose what to keep out of your feed.</p>
+            <div class="it on" data-tg><div class="lead"><svg class="i"><use href="#i-reels"/></svg></div><div class="tx"><b>Reels</b><span>Hidden</span></div><div class="tg on"><i></i></div></div>
+            <div class="it on" data-tg><div class="lead"><svg class="i"><use href="#i-spark"/></svg></div><div class="tx"><b>Suggested posts</b><span>Hidden</span></div><div class="tg on"><i></i></div></div>
+            <div class="it" data-tg><div class="lead"><svg class="i"><use href="#i-story"/></svg></div><div class="tx"><b>Stories</b><span>Shown</span></div><div class="tg"><i></i></div></div>
+            <div class="it" data-tg><div class="lead"><svg class="i"><use href="#i-addp"/></svg></div><div class="tx"><b>People you may know</b><span>Shown</span></div><div class="tg"><i></i></div></div>
+            <div class="foot"><span class="tb fill">Done</span></div>
+          </div></div><div class="gest"></div></div></div>
+      <figcaption><b>Feed filters</b>A modal bottom sheet replaces the centred dialog: reachable with one thumb, dismissible by drag, and it gets an explicit Done.</figcaption>
+    </figure>
+    <figure>
+      <div class="device sm"><div class="screen"><div class="sbar"><span>9:41</span><span class="cam"></span><span><i></i></span></div>
+        <div class="app"><div class="off"><div class="glyph"><svg class="i"><use href="#i-offline"/></svg></div><h4>You’re offline</h4><p>Facefolio couldn’t reach Facebook. Check your connection and try again. Your sign-in is kept.</p><div class="row2"><span class="tb text">Exit</span><span class="tb fill">Try again</span></div></div></div><div class="gest"></div></div></div>
+      <figcaption><b>Offline</b>A full state screen instead of an alert stacked over the splash. The WebView stays alive underneath, so Try again reloads in place.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>Engineering notes</h2>
+  <p class="h2sub">How the launch stays honest on a cold start, a slow network and a low-end phone.</p>
+  <div class="notes">
+    <div class="note"><h4>First-frame parity</h4><p><code>core-splashscreen</code> draws the same vector on the same <code>surface</code> colour. Compose’s first frame starts in that exact state, so the handoff has no seam — the old splash re-drew the mark from scratch.</p></div>
+    <div class="note"><h4>Ready means painted</h4><p>The reveal waits for <code>WebViewCompat.postVisualStateCallback</code> after the injected scripts ran, never for a timer. An 8 s ceiling only exists so a stuck page still opens.</p></div>
+    <div class="note"><h4>No flash for fast launches</h4><p>The progress hairline is gated at 1.2 s. Warm starts reveal before it would ever show, so they feel instant instead of “loading”.</p></div>
+    <div class="note"><h4>One render layer</h4><p>Scale, alpha and clip run in <code>graphicsLayer</code>; nothing triggers layout during the sequence. The old ripples and coloured shadows cost overdraw on every frame.</p></div>
+    <div class="note"><h4>Respect the system</h4><p>With animations off, every step collapses to a 200 ms cross-fade. Colours come from <code>dynamicColorScheme</code>, with a baseline palette below Android 12.</p></div>
+    <div class="note"><h4>Fail open</h4><p>If Facebook changes and a hook stops matching, features degrade one by one and Settings says which. The app never shows a blank page because a selector broke.</p></div>
+  </div>
+</section>
+
+<footer>Facefolio design spec · Be Vietnam Pro · Material 3 tonal palettes generated from the wallpaper seed.</footer>
+</div>
+
+<script>
+// Precomputed M3 tonal schemes (Material Color Utilities, tone values) for three wallpaper seeds.
+const SCHEMES = {
+  violet:{seed:'#6750A4',
+    light:{p:'#65558f',onp:'#fff',pc:'#e9ddff',onpc:'#201047',secc:'#e8def8',onsc:'#1d192b',bg:'#fdf7ff',sl:'#f7f2fa',sc:'#f2ecf4',sch:'#ece6ee',schh:'#e6e0e9',on:'#1d1b20',onv:'#49454e',out:'#7a757f',inv:'#322f35',invon:'#f5eff7',invp:'#cfbdfe',good:'#2e7d32'},
+    dark:{p:'#cfbdfe',onp:'#36275d',pc:'#4d3d75',onpc:'#e9ddff',secc:'#4a4458',onsc:'#e8def8',bg:'#141218',sl:'#1d1b20',sc:'#211f24',sch:'#2b292f',schh:'#36343a',on:'#e6e0e9',onv:'#cbc4cf',out:'#948f99',inv:'#e6e0e9',invon:'#322f35',invp:'#65558f',good:'#81c784'}},
+  teal:{seed:'#006A6A',
+    light:{p:'#006a69',onp:'#fff',pc:'#9cf1f0',onpc:'#002020',secc:'#cce8e7',onsc:'#051f1f',bg:'#f4fbfa',sl:'#eef5f4',sc:'#e9efee',sch:'#e3e9e8',schh:'#dde4e3',on:'#161d1d',onv:'#3f4948',out:'#6f7979',inv:'#2b3231',invon:'#ecf2f1',invp:'#80d5d4',good:'#2e7d32'},
+    dark:{p:'#80d5d4',onp:'#003737',pc:'#004f4f',onpc:'#9cf1f0',secc:'#324b4b',onsc:'#cce8e7',bg:'#0e1514',sl:'#161d1d',sc:'#1a2121',sch:'#252b2b',schh:'#2f3636',on:'#dde4e3',onv:'#bec9c8',out:'#889392',inv:'#dde4e3',invon:'#2b3231',invp:'#006a69',good:'#81c784'}},
+  clay:{seed:'#8F4C38',
+    light:{p:'#8f4c38',onp:'#fff',pc:'#ffdbd1',onpc:'#3a0b01',secc:'#ffdbd1',onsc:'#2c150f',bg:'#fff8f6',sl:'#fff1ed',sc:'#fceae5',sch:'#f7e4e0',schh:'#f1dfda',on:'#231917',onv:'#53433f',out:'#85736e',inv:'#392e2b',invon:'#ffede8',invp:'#ffb5a0',good:'#2e7d32'},
+    dark:{p:'#ffb5a0',onp:'#561f0f',pc:'#723523',onpc:'#ffdbd1',secc:'#5d4037',onsc:'#ffdbd1',bg:'#1a110f',sl:'#231917',sc:'#271d1b',sch:'#322825',schh:'#3d3230',on:'#f1dfda',onv:'#d8c2bc',out:'#a08c87',inv:'#f1dfda',invon:'#392e2b',invp:'#8f4c38',good:'#81c784'}}
+};
+const state = {mode:'light', seed:'violet'};
+const root = document.documentElement;
+
+function applyScheme(){
+  const s = SCHEMES[state.seed][state.mode];
+  const css = `--p:${s.p};--on-p:${s.onp};--pc:${s.pc};--on-pc:${s.onpc};--sec-c:${s.secc};--on-sc:${s.onsc};--bg:${s.bg};--sl:${s.sl};--sc:${s.sc};--sch:${s.sch};--schh:${s.schh};--on:${s.on};--onv:${s.onv};--out:${s.out};--inv:${s.inv};--inv-on:${s.invon};--inv-p:${s.invp};--good:${s.good}`;
+  document.querySelectorAll('.screen,.mini').forEach(el => el.style.cssText = css);
+  root.dataset.theme = state.mode;
+}
+
+const tpl = id => document.getElementById(id).content.cloneNode(true);
+function splashNode(){
+  const f = tpl('t-splash');
+  f.querySelector('.mark-wrap').appendChild(tpl('t-mark'));
+  return f;
+}
+function feedNode(){ return tpl('t-feed'); }
+document.querySelectorAll('[data-tpl="feed"]').forEach(el => el.appendChild(feedNode()));
+
+// Seeds + mode
+const seedsEl = document.getElementById('seeds');
+Object.entries(SCHEMES).forEach(([k, v]) => {
+  const b = document.createElement('button');
+  b.className = 'sw8'; b.style.background = v.seed; b.title = 'Seed ' + v.seed; b.setAttribute('aria-label', 'Seed colour ' + k);
+  b.setAttribute('aria-pressed', k === state.seed);
+  b.onclick = () => { state.seed = k; seedsEl.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); applyScheme(); };
+  seedsEl.appendChild(b);
+});
+document.querySelectorAll('#mode button').forEach(b => b.onclick = () => {
+  state.mode = b.dataset.v; document.querySelectorAll('#mode button').forEach(x => x.setAttribute('aria-pressed', x === b)); applyScheme();
+});
+
+// Toggles + snackbar
+document.querySelectorAll('[data-tg]').forEach(row => row.addEventListener('click', () => {
+  const on = row.classList.toggle('on'); row.querySelector('.tg').classList.toggle('on', on);
+  const sub = row.querySelector('.tx span');
+  if (sub && /^(Hidden|Shown)$/.test(sub.textContent)) sub.textContent = on ? 'Hidden' : 'Shown';
+  const toast = row.closest('.set')?.querySelector('.toast'); if (toast) toast.classList.add('up');
+}));
+
+// Hero launch sequence
+const heroApp = document.getElementById('heroApp');
+const tl = [...document.querySelectorAll('#tl li')];
+let timers = [];
+const mark = p => tl.forEach(li => li.classList.toggle('on', +li.dataset.p === p));
+function launch(){
+  timers.forEach(clearTimeout); timers = [];
+  const reduce = document.getElementById('rm').checked || matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const slow = document.getElementById('slow').checked;
+  heroApp.innerHTML = '';
+  heroApp.classList.toggle('reduce', reduce);
+  const sp = splashNode().firstElementChild; heroApp.appendChild(sp);
+  const content = document.createElement('div'); content.className = 'content'; content.appendChild(feedNode()); heroApp.appendChild(content);
+  mark(0);
+  const at = (ms, fn) => timers.push(setTimeout(fn, ms));
+  at(120, () => { sp.classList.add('s-settle'); mark(1); });
+  at(640, () => { sp.classList.add('s-wait'); mark(2); });
+  const ready = slow ? 3600 : 1050;
+  if (slow) at(1200, () => sp.classList.add('s-slow'));
+  at(ready, () => { sp.classList.add('s-exit'); content.classList.add('shown'); mark(3); });
+  at(ready + 700, () => { content.style.pointerEvents = 'auto'; });
+}
+document.getElementById('replay').onclick = launch;
+document.getElementById('slow').onchange = launch;
+document.getElementById('rm').onchange = launch;
+
+// Storyboard frames (static states of the same component)
+const FRAMES = [
+  ['0 ms', 'Handoff', 'Matches the system splash', ''],
+  ['120 ms', 'Settle begins', 'Circle → squircle', 's-settle'],
+  ['640 ms', 'Settled', 'Shine starts sweeping', 's-settle s-wait'],
+  ['1200 ms', 'Slow network', 'Hairline appears', 's-settle s-wait s-slow'],
+  ['ready + 300', 'Reveal', 'Feed opens from the mark', 's-settle s-exit'],
+];
+const board = document.getElementById('board');
+FRAMES.forEach(([t, b, s, cls], i) => {
+  const fr = document.createElement('div'); fr.className = 'frame';
+  const mini = document.createElement('div'); mini.className = 'mini';
+  const inner = document.createElement('div'); inner.className = 'mini-in'; mini.appendChild(inner);
+  const sp = splashNode().firstElementChild; if (cls) sp.className += ' ' + cls;
+  inner.appendChild(sp);
+  if (i === 4) { const c = document.createElement('div'); c.className = 'content'; c.style.clipPath = 'circle(34% at 50% 50%)'; c.appendChild(feedNode()); inner.appendChild(c); }
+  fr.appendChild(mini);
+  new ResizeObserver(() => inner.style.transform = `scale(${mini.clientWidth / 312})`).observe(mini);
+  fr.insertAdjacentHTML('beforeend', `<div><div class="t">${t}</div><b>${b}</b><br><span>${s}</span></div>`);
+  board.appendChild(fr);
+});
+
+if (matchMedia('(prefers-color-scheme: dark)').matches) document.querySelector('#mode [data-v="dark"]').click();
+applyScheme();
+launch();
+</script>
+</body>
+</html>

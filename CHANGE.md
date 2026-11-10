@@ -1,3 +1,16 @@
+## Facefolio - v1.0.1
+
+* **Visual & Mindful Overhaul**:
+  - Replaced harsh black loading screen with a mindful breathing splash animation (Breathing Folio Mark), subtle hairline progress indicator, and smooth crossfade into the feed.
+  - Upgraded typography across the entire app (dialogs, settings, error screens) to modern **Be Vietnam Pro**.
+  - Embedded offline, CSP-safe **Be Vietnam Pro** (`.woff2`) directly into Facebook WebView with strict `unicode-range` guards to protect Facebook's PUA icon glyphs from turning into tofu boxes.
+* **Cold-Start Fix**:
+  - Eliminated the initial layout shift / clipping on the "What's on your mind?" (composer) card during cold start by pre-bundling scripts synchronously and registering `DOCUMENT_START_SCRIPT` immediately in `onCreated`.
+  - Added `ResizeObserver` and intelligent minimum fallback bounds to `sticky_navbar.js` to ensure the header offset is never zero even before remote images/fonts complete layout.
+* **UI/UX & Smoothness**:
+  - Enabled WebView hardware acceleration (`LAYER_TYPE_HARDWARE`).
+  - Added subtle haptic feedback on settings toggles and standardized touch targets to 40dp+.
+
 ## Facefolio - v1.0.0
 
 * Rebranded and decoupled into **Facefolio** (`com.tachiyuu.facefolio`), an independent, distraction-free Facebook client.

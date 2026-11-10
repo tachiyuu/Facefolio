@@ -25,7 +25,7 @@
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize"
             android:exported="true"
-            android:theme="@style/Theme.Facefolio">
+            android:theme="@style/Theme.Facefolio.Starting">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

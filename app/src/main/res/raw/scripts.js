@@ -2,6 +2,7 @@
 // so when a feature stops working after a Facebook update, look here first (the self-check at the end
 // of this file reports which hooks stopped matching, see window.__mbHealth). Scripts that run after
 // this one read it as window.__mbFB.
+
 window.__mbFB = Object.freeze({
     // Any of these is one item of the feed (post, ad, reel shelf, ...)
     feedItem: '[aria-posinset], div[data-tracking-duration-id], div.vertically-snappable, article',
@@ -210,7 +211,14 @@ window.__mbFB = Object.freeze({
     if (window.isDesktopMode()) return;
 
     const ORDER = ['feed', 'friends', 'messages', 'reels', 'notifications', 'marketplace'];
-    const ALIASES = { home: 'feed', messenger: 'messages', chats: 'messages', video: 'reels', watch: 'reels' };
+    const ALIASES = {
+        home: 'feed', 'trang': 'feed',
+        friends: 'friends', 'bạn': 'friends',
+        messenger: 'messages', chats: 'messages', 'tin': 'messages',
+        video: 'reels', watch: 'reels',
+        notifications: 'notifications', 'thông': 'notifications',
+        marketplace: 'marketplace'
+    };
     const pins = new Set(window.__mbPinnedTabs || ORDER.concat('groups'));
     pins.add('feed');
 
@@ -220,20 +228,37 @@ window.__mbFB = Object.freeze({
     // of the bar (the "‹ Notifications" title row on some pages) wrap below at full width, as before.
     const { tablist: TABLIST, tab: TAB } = window.__mbFB;
     style.textContent = `
-        ${TABLIST}:has(> ${TAB}) {
+        ${TABLIST}:has(> ${TAB}:not([data-mb-unpinned]), > #mb-groups-tab:not([data-mb-unpinned])) {
             display: flex !important; flex-direction: row !important; flex-wrap: wrap !important;
-            justify-content: space-around !important; align-items: flex-start !important;
+            justify-content: space-around !important; align-items: stretch !important;
         }
-        ${TABLIST} > ${TAB}, #mb-groups-tab { flex: 0 0 auto !important; margin: 0 !important; }
-        ${TABLIST} > :not([role="tab"]):not(#mb-groups-tab) { flex: 0 0 100% !important; }
-        ${TABLIST} > [data-mb-unpinned] { display: none !important; }
+        /* Only pinned tabs get display flex; unpinned tabs are strictly hidden */
+        ${TABLIST} > ${TAB}:not([data-mb-unpinned]), #mb-groups-tab:not([data-mb-unpinned]) {
+            flex: 1 1 0 !important; width: 0 !important; min-width: 0 !important; max-width: none !important;
+            height: 48px !important; margin: 0 !important;
+            display: flex !important; flex-direction: column !important; align-items: center !important;
+            justify-content: flex-start !important; pointer-events: auto !important;
+        }
+        /* Our own tab is a row: icon centred both ways */
+        ${TABLIST} > #mb-groups-tab#mb-groups-tab {
+            box-sizing: border-box !important; padding: 0 !important;
+            flex-direction: row !important; align-items: center !important; justify-content: center !important;
+        }
+        ${TABLIST} > :not([role="tab"]):not(#mb-groups-tab) {
+            flex: 0 0 100% !important;
+            border-top: none !important;
+        }
+        /* Strictly hide unpinned tabs with high specificity */
+        ${TABLIST} > [data-mb-unpinned], ${TABLIST} > ${TAB}[data-mb-unpinned], #mb-groups-tab[data-mb-unpinned] {
+            display: none !important;
+        }
+        /* If a page (like /friends/) has no pinned tabs, collapse the empty tab bar completely */
+        ${TABLIST}:not(:has(> ${TAB}:not([data-mb-unpinned]), > #mb-groups-tab:not([data-mb-unpinned]))) {
+            display: none !important;
+        }
         /* Facebook's light theme greys unselected tab icons (#65676b); make them read clearly */
         html[data-mb-theme="light"] ${TABLIST} > ${TAB}[aria-selected="false"] .am > .native-text {
             color: #3a3b3c !important;
-        }
-        #mb-groups-tab {
-            width: 69px; height: 48px; display: flex; align-items: center; justify-content: center;
-            pointer-events: auto !important; /* the bar is pointer-events: none, its tabs opt back in */
         }
     `;
     document.head.appendChild(style);
@@ -255,7 +280,8 @@ window.__mbFB = Object.freeze({
         a.setAttribute('data-mb-ui', '');
         a.href = '/groups_browse/your_groups/'; // plain /groups/ renders an empty page on m.facebook.com
         a.setAttribute('aria-label', 'Groups');
-        // Facebook's page-level click handling swallows plain links in the header
+        a.setAttribute('role', 'tab');
+        a.setAttribute('aria-selected', 'false');
         a.addEventListener('click', e => {
             e.preventDefault();
             e.stopPropagation();
@@ -283,7 +309,6 @@ window.__mbFB = Object.freeze({
             const plain = tabs.find(tab => tab.getAttribute('aria-selected') === 'false') || tabs[0];
             const glyph = plain.querySelector('.am > .native-text') || plain;
             const tab = groupsTab(getComputedStyle(glyph).color);
-            // Match the thin line Facebook draws under every tab
             const line = [...plain.children].find(child => child.offsetHeight === 2);
             if (line) tab.style.borderBottom = `2px solid ${getComputedStyle(line).backgroundColor}`;
             tabs[0].after(tab);
@@ -540,9 +565,11 @@ window.onDomChange(() => {
   };
 
   onReady(() => {
+    window.ThemeBridge?.onReady?.();
     const BUTTON_ID = 'custom-settings-btn';
+    const SIZE = 36;
     const ICON_SVG = `
-        <svg width="28" height="28" viewBox="0 -960 960 960"  fill="%FILL%">
+        <svg width="26" height="26" viewBox="0 -960 960 960" fill="%FILL%" aria-hidden="true">
             <path d="m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm112-260q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Z"/>
         </svg>`;
 
@@ -556,65 +583,61 @@ window.onDomChange(() => {
       if (svg) svg.setAttribute('fill', getFillColor());
     };
 
-    const findInsertionPoint = () => {
-      const iconSpan = Array.from(document.querySelectorAll('span'))
-        .find(span => span.textContent === window.__mbFB.glyphs.headerAnchor);
-      const container = iconSpan?.closest('div[role="button"]')?.parentNode;
-
-      const desktopTarget = document.querySelector(window.__mbFB.desktop.headerActions);
-
-      return { container, desktopTarget };
+    // Facebook's header button the settings button sits beside (mobile: by its icon glyph)
+    let anchor = null;
+    const findAnchor = () => {
+      if (anchor?.isConnected) return anchor;
+      anchor = null;
+      for (const span of document.querySelectorAll('[role="button"] span')) {
+        if (span.textContent === window.__mbFB.glyphs.headerAnchor) return (anchor = span.closest('[role="button"]'));
+      }
+      return null;
     };
 
     const createButton = () => {
       const btn = document.createElement('button');
       btn.id = BUTTON_ID;
-      btn.setAttribute('style', `
-        position: ${findInsertionPoint().desktopTarget === null ? 'fixed' : 'block'};
-        top: 8px;
-        right: 100px;
-        background: transparent;
-        border: none;
-        border-radius: 50%;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-        pointer-events: auto;
-      `);
+      btn.type = 'button';
+      btn.setAttribute('data-mb-ui', '');
+      btn.setAttribute('aria-label', 'Facefolio settings');
+      btn.style.cssText = `width:${SIZE}px;height:${SIZE}px;padding:0;background:transparent;border:none;border-radius:50%;` +
+        'cursor:pointer;display:flex;align-items:center;justify-content:center;pointer-events:auto;-webkit-tap-highlight-color:transparent;';
       btn.innerHTML = ICON_SVG.replace('%FILL%', getFillColor());
-      btn.onclick = () => SettingsBridge?.onSettingsToggle?.();
+      btn.onclick = e => { e.preventDefault(); e.stopPropagation(); window.SettingsBridge?.onSettingsToggle?.(); };
       return btn;
     };
 
-    const insertButton = () => {
-      if (document.getElementById(BUTTON_ID)) return;
+    const place = () => {
+      let btn = document.getElementById(BUTTON_ID);
 
-      const { container, desktopTarget } = findInsertionPoint();
-      const button = createButton();
-
-      if (desktopTarget) desktopTarget.insertBefore(button, desktopTarget.firstChild);
-      else if (container) container.insertBefore(button, container.firstChild);
-    };
-
-    // On mobile the button is fixed to where the home header sits; on other pages (Notifications)
-    // that spot is the tab bar, so it only shows on the home feed
-    const showOnHomeOnly = () => {
-      const btn = document.getElementById(BUTTON_ID);
-      const display = window.isDesktopMode() || location.pathname === '/' ? 'flex' : 'none';
-      if (btn && btn.style.display !== display) btn.style.display = display;
-    };
-
-    insertButton();
-    showOnHomeOnly();
-
-    window.onDomChange(() => {
-      if (!document.getElementById(BUTTON_ID) && isFeed()) {
-        insertButton();
+      if (window.isDesktopMode()) {
+        const target = document.querySelector(window.__mbFB.desktop.headerActions);
+        if (target && !btn) target.insertBefore(createButton(), target.firstChild);
+        return;
       }
-      showOnHomeOnly();
-    });
+
+      // Mobile: Facebook positions its header absolutely, so the button can't join the flow. It is
+      // fixed and measured against the anchor each time the page changes, never at a guessed offset;
+      // where the anchor isn't (other pages, login) it hides. The launcher shortcut covers those.
+      const rect = findAnchor()?.getBoundingClientRect();
+      const visible = rect && rect.width > 0 && rect.bottom > 0 && rect.top < 120;
+      if (!visible) { if (btn) btn.style.display = 'none'; return; }
+      if (!btn) { btn = createButton(); document.body.appendChild(btn); }
+      Object.assign(btn.style, {
+        position: 'fixed', zIndex: '1001', display: 'flex',
+        top: `${Math.round(rect.top + (rect.height - SIZE) / 2)}px`,
+        left: `${Math.round(rect.left - SIZE - 8)}px`,
+      });
+    };
+
+    place();
+    window.onDomChange(place);
+    let queued = false;
+    window.addEventListener('scroll', () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => { queued = false; place(); });
+    }, { passive: true });
 
     // observer for theme-color changes
     const themeMeta = document.querySelector(window.__mbFB.themeColor);
@@ -698,6 +721,7 @@ window.onDomChange(() => {
         health.checkedAt = new Date().toISOString();
         if (health.failures.length)
             console.warn('[Facefolio] Facebook hooks not found, features may not work:', health.failures.join(', '));
+        window.HealthBridge?.report?.(health.status, health.failures.join(','));
     };
 
     // Only the logged-in home feed has all hooks; the login screen is built with bloks UI

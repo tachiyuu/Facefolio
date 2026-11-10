@@ -398,91 +398,91 @@ private fun DetailedFeedFiltersDialog(
     val hideMarketplace = viewModel.hideMarketplace.collectAsState()
     val hideAiContent = viewModel.hideAiContent.collectAsState()
 
-        ToggleSheet(
-            title = stringResource(R.string.feed_filters_title),
-            hint = stringResource(R.string.show_in_feed_hint),
-            onDismiss = onDismiss
-        ) {
-            FilterSwitchRow(
-                icon = Icons.Filled.Try,
-                title = stringResource(R.string.suggested_posts),
-                checked = hideSuggested.value,
-                activeSubtitle = stringResource(R.string.state_hidden),
-                inactiveSubtitle = stringResource(R.string.state_shown),
-                onToggle = {
-                    viewModel.setHideSuggested(!hideSuggested.value)
-                    onSettingChanged()
-                }
-            )
-            FilterSwitchRow(
-                icon = Icons.Filled.Camera,
-                title = stringResource(R.string.reels),
-                checked = hideReels.value,
-                activeSubtitle = stringResource(R.string.state_hidden),
-                inactiveSubtitle = stringResource(R.string.state_shown),
-                onToggle = {
-                    viewModel.setHideReels(!hideReels.value)
-                    onSettingChanged()
-                }
-            )
-            FilterSwitchRow(
-                icon = Icons.Filled.BurstMode,
-                title = stringResource(R.string.stories),
-                checked = hideStories.value,
-                activeSubtitle = stringResource(R.string.state_hidden),
-                inactiveSubtitle = stringResource(R.string.state_shown),
-                onToggle = {
-                    viewModel.setHideStories(!hideStories.value)
-                    onSettingChanged()
-                }
-            )
-            FilterSwitchRow(
-                icon = Icons.Filled.EmojiPeople,
-                title = stringResource(R.string.people_you_may_know),
-                checked = hidePeopleYouMayKnow.value,
-                activeSubtitle = stringResource(R.string.state_hidden),
-                inactiveSubtitle = stringResource(R.string.state_shown),
-                onToggle = {
-                    viewModel.setHidePeopleYouMayKnow(!hidePeopleYouMayKnow.value)
-                    onSettingChanged()
-                }
-            )
-            FilterSwitchRow(
-                icon = Icons.Filled.AutoAwesome,
-                title = stringResource(R.string.ai_content),
-                checked = hideAiContent.value,
-                activeSubtitle = stringResource(R.string.state_hidden),
-                inactiveSubtitle = stringResource(R.string.state_shown),
-                onToggle = {
-                    viewModel.setHideAiContent(!hideAiContent.value)
-                    onSettingChanged()
-                }
-            )
-            FilterSwitchRow(
-                icon = Icons.Filled.Storefront,
-                title = stringResource(R.string.marketplace),
-                checked = hideMarketplace.value,
-                activeSubtitle = stringResource(R.string.state_hidden),
-                inactiveSubtitle = stringResource(R.string.state_shown),
-                onToggle = {
-                    viewModel.setHideMarketplace(!hideMarketplace.value)
-                    onSettingChanged()
-                }
-            )
-            if (!viewModel.desktopLayout.collectAsState().value) {
-                FilterSwitchRow(
-                    icon = Icons.Filled.Diversity1,
-                    title = stringResource(R.string.groups),
-                    checked = hideGroups.value,
-                    activeSubtitle = stringResource(R.string.state_hidden),
-                    inactiveSubtitle = stringResource(R.string.state_shown),
-                    onToggle = {
-                        viewModel.setHideGroups(!hideGroups.value)
-                        onSettingChanged()
-                    }
-                )
+    ToggleSheet(
+        title = stringResource(R.string.feed_filters_title),
+        hint = stringResource(R.string.show_in_feed_hint),
+        onDismiss = onDismiss
+    ) {
+        FilterSwitchRow(
+            icon = Icons.Filled.Try,
+            title = stringResource(R.string.suggested_posts),
+            checked = hideSuggested.value,
+            activeSubtitle = stringResource(R.string.state_hidden),
+            inactiveSubtitle = stringResource(R.string.state_shown),
+            onToggle = {
+                viewModel.setHideSuggested(!hideSuggested.value)
+                onSettingChanged()
             }
+        )
+        FilterSwitchRow(
+            icon = Icons.Filled.Camera,
+            title = stringResource(R.string.reels),
+            checked = hideReels.value,
+            activeSubtitle = stringResource(R.string.state_hidden),
+            inactiveSubtitle = stringResource(R.string.state_shown),
+            onToggle = {
+                viewModel.setHideReels(!hideReels.value)
+                onSettingChanged()
+            }
+        )
+        FilterSwitchRow(
+            icon = Icons.Filled.BurstMode,
+            title = stringResource(R.string.stories),
+            checked = hideStories.value,
+            activeSubtitle = stringResource(R.string.state_hidden),
+            inactiveSubtitle = stringResource(R.string.state_shown),
+            onToggle = {
+                viewModel.setHideStories(!hideStories.value)
+                onSettingChanged()
+            }
+        )
+        FilterSwitchRow(
+            icon = Icons.Filled.EmojiPeople,
+            title = stringResource(R.string.people_you_may_know),
+            checked = hidePeopleYouMayKnow.value,
+            activeSubtitle = stringResource(R.string.state_hidden),
+            inactiveSubtitle = stringResource(R.string.state_shown),
+            onToggle = {
+                viewModel.setHidePeopleYouMayKnow(!hidePeopleYouMayKnow.value)
+                onSettingChanged()
+            }
+        )
+        FilterSwitchRow(
+            icon = Icons.Filled.AutoAwesome,
+            title = stringResource(R.string.ai_content),
+            checked = hideAiContent.value,
+            activeSubtitle = stringResource(R.string.state_hidden),
+            inactiveSubtitle = stringResource(R.string.state_shown),
+            onToggle = {
+                viewModel.setHideAiContent(!hideAiContent.value)
+                onSettingChanged()
+            }
+        )
+        FilterSwitchRow(
+            icon = Icons.Filled.Storefront,
+            title = stringResource(R.string.marketplace),
+            checked = hideMarketplace.value,
+            activeSubtitle = stringResource(R.string.state_hidden),
+            inactiveSubtitle = stringResource(R.string.state_shown),
+            onToggle = {
+                viewModel.setHideMarketplace(!hideMarketplace.value)
+                onSettingChanged()
+            }
+        )
+        if (!viewModel.desktopLayout.collectAsState().value) {
+            FilterSwitchRow(
+                icon = Icons.Filled.Diversity1,
+                title = stringResource(R.string.groups),
+                checked = hideGroups.value,
+                activeSubtitle = stringResource(R.string.state_hidden),
+                inactiveSubtitle = stringResource(R.string.state_shown),
+                onToggle = {
+                    viewModel.setHideGroups(!hideGroups.value)
+                    onSettingChanged()
+                }
+            )
         }
+    }
 }
 
 @Composable

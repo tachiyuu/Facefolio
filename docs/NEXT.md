@@ -12,20 +12,15 @@ Where the M3 rebuild / stability pass stands (2026-11-10) and what is left.
 - Tab bar: evenly spaced, Groups tab icon centred. Counts hidden, including "Name and N others".
 
 ## Left to do
-Items 1-3 done 2026-11-10:
-- Groups underline removed; tab bar fixed on Notifications/Friends/Groups; gear hides where its slot
-  holds a button. `/messages/` is Facebook's own "Switch over to Messenger" page (not ours); its status
-  bar stays light on a dark page, a possible small polish.
-- Benchmarks: health-check all OK; feed-audit hides ads/suggested as expected; perf-bench 80 fps
-  (baseline 62), our share of main-thread busy time 5% (place() hit-testing per scroll frame had made it
-  1.3 s per 10 s; now only on DOM changes).
+All six items of the 2026-11-10 list are done (see `docs/ANALYSIS.md` for measurements). Open:
 
-4. **Docs**: `docs/mockup/facefolio-m3.html` still says frame 0 is a system splash with the icon in a
-   160 dp circle; it is now plain surface colour with the Compose tile easing in. Write `docs/ANALYSIS.md`
-   (UI bottlenecks, Facebook dependencies, resilience plan: central `window.__mbFB` selectors, health
-   reporting, fail-open, tools/). Update `CHANGE.md`.
-5. **Locales**: new strings exist only in `values/` and `values-vi/`; other locales fall back to English.
-6. Light theme and AMOLED / Material You checks of the tab bar.
+1. **Lint translations**: `./gradlew :app:lintRelease` fails on `MissingTranslation`, and this predates this work
+   (older strings missing in de/fr/pt and others; pl has only the new strings). CI runs `assembleDebug` only.
+   Either translate the rest or mark the gap as a warning in `lint { }`.
+2. **Light theme**: not checked on device. Facebook only follows its own account setting (it ignores the
+   system and emulated colour scheme), so this needs the account switched to light mode by the user.
+3. **Messages page**: Facebook's "Switch over to Messenger" page keeps a light status bar on a dark page.
+4. **Baseline profile** (as in Vozforums) for faster first launch of the Compose code.
 
 ## Notes
 - adb: `C:/Users/theng/AppData/Local/Android/Sdk/platform-tools` (not on PATH; `tools/cdp.js` needs it).

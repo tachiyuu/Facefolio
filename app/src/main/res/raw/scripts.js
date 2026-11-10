@@ -40,6 +40,20 @@ window.__mbFB = Object.freeze({
     }
 })();
 
+// Facebook's server-rendered header sometimes keeps a stale Chromium layout: absolutely positioned
+// images (logo, composer avatar) get sized against the page instead of their box, so the logo shows
+// huge and clipped. Any full relayout fixes it (a web font loading used to do that by accident), so
+// force one when the page has loaded. Same frame, so nothing flickers; scroll position is kept.
+window.addEventListener('load', () => {
+    const body = document.body;
+    if (!body) return;
+    const y = window.scrollY;
+    body.style.display = 'none';
+    void body.offsetHeight;
+    body.style.display = '';
+    if (y) window.scrollTo(0, y);
+}, { once: true });
+
 // One shared observer for scripts that simply re-run when the page changes. Facebook makes dozens of
 // DOM mutations per frame while scrolling; each callback here runs at most once per frame instead of
 // once per mutation. Only node additions/removals wake it (not style writes), so callbacks that set

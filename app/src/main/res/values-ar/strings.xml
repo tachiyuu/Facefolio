@@ -39,4 +39,23 @@
     <string name="enable_copy_to_clipboard_button_on_media_view">تفعيل زر النسخ للحافظة عند عرض الوسائط</string>
     <string name="facefolio_settings">إعدادات Facefolio</string>
     <string name="not_supported">غير مدعوم</string>
+    <string name="feed_filters_title">فلاتر الموجز التفصيلية</string>
+    <string name="feed_filters_summary">ريلز، قصص، اقتراحات، ذكاء اصطناعي…</string>
+    <string name="settings_saved">تم حفظ الإعدادات</string>
+    <string name="reload_now">إعادة التحميل</string>
+    <string name="filters_hidden_count">مخفية: %1$d</string>
+    <string name="tabs_count">علامات التبويب: %1$d</string>
+    <string name="done">تم</string>
+    <string name="exit">خروج</string>
+    <string name="compat_title">التوافق مع فيسبوك</string>
+    <string name="compat_ok">كل الميزات تعمل مع فيسبوك الحالي</string>
+    <string name="compat_failed">تغيّر فيسبوك: قد لا تعمل %1$s</string>
+    <string name="compat_pending">يُفحص بعد تحميل الموجز</string>
+    <string name="splash_tagline">تواصل، بلا ضجيج</string>
+    <string name="offline_title">أنت غير متصل</string>
+    <string name="offline_body">تعذّر على Facefolio الوصول إلى فيسبوك. تحقّق من اتصالك وحاول مجددًا. يبقى تسجيل دخولك محفوظًا.</string>
+    <string name="compat_short_ok">متوافق</string>
+    <string name="compat_short_failed">يحتاج إلى تحديث</string>
+    <string name="compat_short_pending">جارٍ الفحص</string>
+    <string name="settings_shortcut">الإعدادات</string>
 </resources>

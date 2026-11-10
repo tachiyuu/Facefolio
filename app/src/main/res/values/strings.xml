@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Facefolio</string>
+    <string name="app_name" translatable="false">Facefolio</string>
 
     <!-- Bottom Text and Buttons -->
     <string name="apply_immediately">Apply Immediately?</string>

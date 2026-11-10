@@ -36,4 +36,23 @@
     <string name="enable_download_button_on_media_view">Activar botón de descarga en vista de medios</string>
     <string name="enable_copy_to_clipboard_button_on_media_view">Activar botón de copiar al portapapeles en vista de medios</string>
     <string name="facefolio_settings">Configuración de Facefolio</string>
+    <string name="feed_filters_title">Filtros detallados del feed</string>
+    <string name="feed_filters_summary">Reels, Stories, sugerencias, IA…</string>
+    <string name="settings_saved">Ajustes guardados</string>
+    <string name="reload_now">Recargar</string>
+    <string name="filters_hidden_count">%1$d ocultos</string>
+    <string name="tabs_count">%1$d pestañas</string>
+    <string name="done">Listo</string>
+    <string name="exit">Salir</string>
+    <string name="compat_title">Compatibilidad con Facebook</string>
+    <string name="compat_ok">Todas las funciones van bien con el Facebook actual</string>
+    <string name="compat_failed">Facebook cambió: puede que %1$s no funcione</string>
+    <string name="compat_pending">Se comprueba al cargar el feed</string>
+    <string name="splash_tagline">Social, sin el ruido</string>
+    <string name="offline_title">Sin conexión</string>
+    <string name="offline_body">Facefolio no pudo conectar con Facebook. Revisa tu conexión e inténtalo de nuevo. Tu sesión se conserva.</string>
+    <string name="compat_short_ok">Compatible</string>
+    <string name="compat_short_failed">Requiere actualización</string>
+    <string name="compat_short_pending">Comprobando</string>
+    <string name="settings_shortcut">Ajustes</string>
 </resources>

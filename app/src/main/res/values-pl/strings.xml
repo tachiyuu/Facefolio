@@ -1,3 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="feed_filters_title">Szczegółowe filtry kanału</string>
+    <string name="feed_filters_summary">Reels, relacje, sugestie, AI…</string>
+    <string name="settings_saved">Zapisano ustawienia</string>
+    <string name="reload_now">Odśwież</string>
+    <string name="filters_hidden_count">Ukryte: %1$d</string>
+    <string name="tabs_count">Karty: %1$d</string>
+    <string name="done">Gotowe</string>
+    <string name="exit">Wyjdź</string>
+    <string name="compat_title">Zgodność z Facebookiem</string>
+    <string name="compat_ok">Wszystkie funkcje działają z obecnym Facebookiem</string>
+    <string name="compat_failed">Facebook się zmienił: %1$s może nie działać</string>
+    <string name="compat_pending">Sprawdzane po wczytaniu kanału</string>
+    <string name="splash_tagline">Społecznościowo, bez szumu</string>
+    <string name="offline_title">Jesteś offline</string>
+    <string name="offline_body">Facefolio nie może połączyć się z Facebookiem. Sprawdź połączenie i spróbuj ponownie. Logowanie zostaje zachowane.</string>
+    <string name="compat_short_ok">Zgodne</string>
+    <string name="compat_short_failed">Wymaga aktualizacji</string>
+    <string name="compat_short_pending">Sprawdzanie</string>
+    <string name="settings_shortcut">Ustawienia</string>
 </resources>

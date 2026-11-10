@@ -70,7 +70,7 @@ svg.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.75;str
 /* ───── Splash ───── */
 .splash{position:absolute;inset:0;background:var(--bg);display:grid;place-items:center;z-index:10}
 .mark-wrap{position:relative;width:160px;height:160px;display:grid;place-items:center}
-/* Frame 0 equals the Android 12 system splash: launcher icon inside a 160dp circle mask. */
+/* Frame 0 equals the system splash: plain surface colour (its icon is an invisible fill), so the tile can ease in from nothing. */
 .tile{position:absolute;width:160px;height:160px;border-radius:80px;background:var(--pc);transform:scale(.62);
   transition:border-radius .52s var(--emph),transform .52s var(--emph),background .4s}
 .mark{position:relative;width:108px;height:108px;color:var(--on-pc);transform:scale(.62);transition:transform .52s var(--emph)}
@@ -291,10 +291,10 @@ footer{padding:40px 0 64px;color:var(--ink2);font-size:13px;border-top:1px solid
   <div class="hero">
     <div>
       <h2>Launch sequence</h2>
-      <p class="h2sub">The first frame is the Android 12 system splash, pixel for pixel. Nothing jumps, nothing is redrawn: the icon simply settles, the name arrives, and the feed opens out of the mark once Facebook has actually painted — not when a timer says so.</p>
+      <p class="h2sub">The first frame is the system splash: plain surface, no icon, the same colour Compose draws next. Nothing jumps, nothing is redrawn: the tile eases in from 96 to 112 dp, the name arrives, and the feed opens out of the mark once Facebook has actually painted — not when a timer says so.</p>
       <button class="btnp" id="replay"><svg class="i" style="width:18px;height:18px"><path d="M4 12a8 8 0 1 0 2.3-5.7M4 4.5v4.5h4.5"/></svg>Replay launch</button>
       <ol class="timeline" id="tl">
-        <li data-p="0"><span class="t">0 ms</span><div><b>System handoff</b><span>Icon in a 160 dp circle on <code>surface</code> — identical to the OS splash, so the switch to Compose is invisible.</span></div></li>
+        <li data-p="0"><span class="t">0 ms</span><div><b>System handoff</b><span>Plain <code>surface</code> colour, held until Compose has drawn its first frame. The OS splash shows no icon, so there is no launcher icon to jump from and the switch is invisible.</span></div></li>
         <li data-p="1"><span class="t">120 ms</span><div><b>Settle</b><span>Circle morphs to a 36 dp squircle, icon scales 0.62 → 0.60, wordmark rises 8 dp. 520 ms, emphasized.</span></div></li>
         <li data-p="2"><span class="t">640 ms →</span><div><b>Alive, not busy</b><span>A slow specular sweep along the strokes. A hairline progress only appears if loading passes 1.2 s, so fast launches never flash a bar.</span></div></li>
         <li data-p="3"><span class="t">ready</span><div><b>Reveal</b><span>On WebView’s first visual-state callback the mark recedes and the feed opens in a circle from its centre. 620 ms, emphasized decelerate.</span></div></li>
@@ -478,7 +478,7 @@ document.getElementById('rm').onchange = launch;
 
 // Storyboard frames (static states of the same component)
 const FRAMES = [
-  ['0 ms', 'Handoff', 'Matches the system splash', ''],
+  ['0 ms', 'Handoff', 'Plain surface, same as the system splash', ''],
   ['120 ms', 'Settle begins', 'Circle → squircle', 's-settle'],
   ['640 ms', 'Settled', 'Shine starts sweeping', 's-settle s-wait'],
   ['1200 ms', 'Slow network', 'Hairline appears', 's-settle s-wait s-slow'],

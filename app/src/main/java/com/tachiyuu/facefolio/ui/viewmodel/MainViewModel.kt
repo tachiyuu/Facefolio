@@ -43,7 +43,6 @@ class MainViewModel(
     ): String {
         val scripts = listOf(
             Script(true, R.raw.scripts, "scripts.js"), // always apply
-            Script(true, R.raw.be_vietnam_pro, "be_vietnam_pro.js"),
             Script(settings.removeAds.value, R.raw.adblock, "adblock.js"),
             Script(settings.enableDownloadContent.value, R.raw.download_content, "download_content.js"),
             Script(settings.enableCopyToClipboard.value, R.raw.copy_to_clipboard, "copy_to_clipboard.js"),

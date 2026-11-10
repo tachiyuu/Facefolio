@@ -6,14 +6,10 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.tachiyuu.facefolio.R
 import com.tachiyuu.facefolio.utils.Script
 import com.tachiyuu.facefolio.utils.fetchScripts
 import java.util.concurrent.ConcurrentHashMap
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class MainViewModel(
     resources: Resources,
@@ -33,17 +29,9 @@ class MainViewModel(
     private val _themeColor = mutableStateOf(Color.Transparent)
     val themeColor: State<Color> = _themeColor
 
-    private val _scripts = mutableStateOf<String?>(null)
+    // Pre-bundle scripts immediately so DOCUMENT_START_SCRIPT is never delayed on cold start
+    private val _scripts = mutableStateOf<String?>(buildScripts(resources, settings))
     val scripts: State<String?> = _scripts
-
-    init {
-        viewModelScope.launch(Dispatchers.IO) {
-            val bundle = buildScripts(resources, settings)
-            withContext(Dispatchers.Main.immediate) {
-                _scripts.value = bundle
-            }
-        }
-    }
 
     fun setThemeColor(color: Color) {
         _themeColor.value = color

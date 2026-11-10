@@ -29,4 +29,23 @@
     <string name="hide_sponsored_ads_from_your_feed">Gesponserte Werbung im Feed ausblenden</string>
     <string name="enable_download_button_on_media_view">Download-Button in Medienansicht aktivieren</string>
     <string name="facefolio_settings">Facefolio-Einstellungen</string>
+    <string name="feed_filters_title">Detaillierte Feed-Filter</string>
+    <string name="feed_filters_summary">Reels, Stories, Vorschläge, KI…</string>
+    <string name="settings_saved">Einstellungen gespeichert</string>
+    <string name="reload_now">Neu laden</string>
+    <string name="filters_hidden_count">%1$d ausgeblendet</string>
+    <string name="tabs_count">%1$d Tabs</string>
+    <string name="done">Fertig</string>
+    <string name="exit">Beenden</string>
+    <string name="compat_title">Facebook-Kompatibilität</string>
+    <string name="compat_ok">Alle Funktionen arbeiten mit dem aktuellen Facebook</string>
+    <string name="compat_failed">Facebook hat sich geändert: %1$s funktioniert evtl. nicht</string>
+    <string name="compat_pending">Wird nach dem Laden des Feeds geprüft</string>
+    <string name="splash_tagline">Sozial, ohne den Lärm</string>
+    <string name="offline_title">Du bist offline</string>
+    <string name="offline_body">Facefolio konnte Facebook nicht erreichen. Prüfe deine Verbindung und versuche es erneut. Deine Anmeldung bleibt erhalten.</string>
+    <string name="compat_short_ok">Kompatibel</string>
+    <string name="compat_short_failed">Update nötig</string>
+    <string name="compat_short_pending">Wird geprüft</string>
+    <string name="settings_shortcut">Einstellungen</string>
 </resources>

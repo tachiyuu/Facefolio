@@ -34,4 +34,23 @@
     <string name="material_you_title">Material You</string>
     <string name="image_copied_to_clipboard">圖片已複製到剪貼簿</string>
     <string name="copy_failed_invalid_data">複製失敗：資料無效</string>
+    <string name="feed_filters_title">詳細動態篩選</string>
+    <string name="feed_filters_summary">Reels、限時動態、建議、AI…</string>
+    <string name="settings_saved">設定已儲存</string>
+    <string name="reload_now">重新載入</string>
+    <string name="filters_hidden_count">已隱藏 %1$d 則</string>
+    <string name="tabs_count">%1$d 個分頁</string>
+    <string name="done">完成</string>
+    <string name="exit">離開</string>
+    <string name="compat_title">Facebook 相容性</string>
+    <string name="compat_ok">所有功能皆可在目前的 Facebook 上運作</string>
+    <string name="compat_failed">Facebook 已變更：%1$s 可能無法運作</string>
+    <string name="compat_pending">動態載入後檢查</string>
+    <string name="splash_tagline">社群，少了雜訊</string>
+    <string name="offline_title">你已離線</string>
+    <string name="offline_body">Facefolio 無法連線到 Facebook。請檢查網路連線後再試一次。你的登入狀態會保留。</string>
+    <string name="compat_short_ok">相容</string>
+    <string name="compat_short_failed">需要更新</string>
+    <string name="compat_short_pending">檢查中</string>
+    <string name="settings_shortcut">設定</string>
 </resources>

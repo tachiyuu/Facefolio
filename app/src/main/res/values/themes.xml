@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.Facefolio" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:windowBackground">@android:color/background_dark</item>
+        <item name="android:windowBackground">@color/splash_background</item>
         <item name="android:colorControlActivated">#6750a4</item>
     </style>
+
+    <!-- Launch theme: the system splash is only the background colour. The logo is drawn by SplashLoading
+         on the same colour, so the hand-off from system splash to Compose has nothing to mismatch. -->
+    <style name="Theme.Facefolio.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_blank</item>
+        <item name="postSplashScreenTheme">@style/Theme.Facefolio</item>
+    </style>
+
 </resources>

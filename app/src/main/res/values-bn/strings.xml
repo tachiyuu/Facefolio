@@ -40,4 +40,23 @@
     <string name="enable_material_you_theming_for_facebook">ফেসবুকের জন্য \'ম্যাটেরিয়াল ইউ\' থিম চালু করুন</string>
     <string name="enable_copy_to_clipboard_button_on_media_view">মিডিয়া ভিউ\'তে ‘কপি টু ক্লিপবোর্ড’ বাটন চালু করুন</string>
     <string name="not_supported">সাপোর্ট করে না</string>
+    <string name="feed_filters_title">বিস্তারিত ফিড ফিল্টার</string>
+    <string name="feed_filters_summary">রিলস, স্টোরি, পরামর্শ, এআই…</string>
+    <string name="settings_saved">সেটিংস সংরক্ষিত হয়েছে</string>
+    <string name="reload_now">রিলোড</string>
+    <string name="filters_hidden_count">%1$dটি লুকানো</string>
+    <string name="tabs_count">%1$dটি ট্যাব</string>
+    <string name="done">সম্পন্ন</string>
+    <string name="exit">বের হন</string>
+    <string name="compat_title">ফেসবুক সামঞ্জস্য</string>
+    <string name="compat_ok">বর্তমান ফেসবুকে সব ফিচার কাজ করছে</string>
+    <string name="compat_failed">ফেসবুক বদলেছে: %1$s কাজ নাও করতে পারে</string>
+    <string name="compat_pending">ফিড লোড হওয়ার পরে যাচাই করা হয়</string>
+    <string name="splash_tagline">সামাজিক, কোলাহল ছাড়া</string>
+    <string name="offline_title">আপনি অফলাইনে আছেন</string>
+    <string name="offline_body">Facefolio ফেসবুকে পৌঁছাতে পারেনি। সংযোগ দেখে আবার চেষ্টা করুন। আপনার সাইন-ইন রাখা আছে।</string>
+    <string name="compat_short_ok">সামঞ্জস্যপূর্ণ</string>
+    <string name="compat_short_failed">আপডেট দরকার</string>
+    <string name="compat_short_pending">যাচাই চলছে</string>
+    <string name="settings_shortcut">সেটিংস</string>
 </resources>

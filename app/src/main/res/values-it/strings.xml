@@ -41,4 +41,23 @@
     <string name="enable_copy_to_clipboard_button_on_media_view">Abilita il pulsante \'Copia negli appunti\' nella vista contenuti multimediali</string>
     <string name="facefolio_settings">Impostazioni Facefolio</string>
     <string name="not_supported">Non supportato</string>
+    <string name="feed_filters_title">Filtri dettagliati del feed</string>
+    <string name="feed_filters_summary">Reels, Storie, suggerimenti, IA…</string>
+    <string name="settings_saved">Impostazioni salvate</string>
+    <string name="reload_now">Ricarica</string>
+    <string name="filters_hidden_count">%1$d nascosti</string>
+    <string name="tabs_count">%1$d schede</string>
+    <string name="done">Fine</string>
+    <string name="exit">Esci</string>
+    <string name="compat_title">Compatibilità con Facebook</string>
+    <string name="compat_ok">Tutte le funzioni sono compatibili con l\'attuale Facebook</string>
+    <string name="compat_failed">Facebook è cambiato: %1$s potrebbe non funzionare</string>
+    <string name="compat_pending">Verificato dopo il caricamento del feed</string>
+    <string name="splash_tagline">Social, senza il rumore</string>
+    <string name="offline_title">Sei offline</string>
+    <string name="offline_body">Facefolio non è riuscito a raggiungere Facebook. Controlla la connessione e riprova. L\'accesso resta salvato.</string>
+    <string name="compat_short_ok">Compatibile</string>
+    <string name="compat_short_failed">Da aggiornare</string>
+    <string name="compat_short_pending">Verifica in corso</string>
+    <string name="settings_shortcut">Impostazioni</string>
 </resources>

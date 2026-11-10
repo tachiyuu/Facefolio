@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Facefolio</string>
+    <string name="app_name" translatable="false">Facefolio</string>
 
     <!-- Bottom Text and Buttons -->
     <string name="apply_immediately">Apply Immediately?</string>
@@ -46,10 +46,12 @@
     <string name="enable_copy_to_clipboard_button_on_media_view">Enable copy to clipboard button on media view</string>
     <string name="facefolio_settings">Facefolio settings</string>
     <string name="not_supported">Not supported</string>
-    <string name="section_feed">Feed</string>
+    <string name="section_feed">Feed &amp; Mindfulness</string>
     <string name="section_fewer_distractions">Fewer distractions</string>
-    <string name="section_look">Look</string>
-    <string name="section_advanced">Advanced</string>
+    <string name="section_look">Visuals &amp; Navigation</string>
+    <string name="section_advanced">Tools &amp; Advanced</string>
+    <string name="feed_filters_title">Detailed feed filters</string>
+    <string name="feed_filters_summary">Reels, Stories, Suggestions, AI…</string>
     <string name="marketplace">Marketplace</string>
     <string name="show_in_feed_all_shown">Everything is shown</string>
     <string name="show_in_feed_hidden_summary">Hidden: %1$s</string>
@@ -64,4 +66,21 @@
     <string name="tab_notifications">Notifications</string>
     <string name="tab_friends">Friends</string>
     <string name="tab_messages">Messages</string>
+    <string name="settings_saved">Settings saved</string>
+    <string name="reload_now">Reload</string>
+    <string name="filters_hidden_count">%1$d hidden</string>
+    <string name="tabs_count">%1$d tabs</string>
+    <string name="done">Done</string>
+    <string name="exit">Exit</string>
+    <string name="compat_title">Facebook compatibility</string>
+    <string name="compat_ok">All features are working with the current Facebook</string>
+    <string name="compat_failed">Facebook changed: %1$s may not work</string>
+    <string name="compat_pending">Checked after the feed loads</string>
+    <string name="splash_tagline">Social, without the noise</string>
+    <string name="offline_title">You’re offline</string>
+    <string name="offline_body">Facefolio couldn’t reach Facebook. Check your connection and try again. Your sign-in is kept.</string>
+    <string name="compat_short_ok">Compatible</string>
+    <string name="compat_short_failed">Needs update</string>
+    <string name="compat_short_pending">Checking</string>
+    <string name="settings_shortcut">Settings</string>
 </resources>

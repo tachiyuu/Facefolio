@@ -9,6 +9,7 @@ import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
@@ -36,7 +37,7 @@ import com.multiplatform.webview.web.WebView
 import com.multiplatform.webview.web.rememberSaveableWebViewState
 import com.multiplatform.webview.web.rememberWebViewNavigator
 import com.tachiyuu.facefolio.R
-import com.tachiyuu.facefolio.ui.components.NetworkErrorDialog
+import com.tachiyuu.facefolio.ui.components.OfflineScreen
 import com.tachiyuu.facefolio.ui.components.settings.SettingsDialog
 import com.tachiyuu.facefolio.ui.theme.facefolioColorScheme
 import com.tachiyuu.facefolio.ui.viewmodel.MainViewModel
@@ -47,6 +48,7 @@ import com.tachiyuu.facefolio.utils.fileChooserWebViewParams
 import com.tachiyuu.facefolio.utils.jsBridge.ClipboardBridge
 import com.tachiyuu.facefolio.utils.jsBridge.DownloadBridge
 import com.tachiyuu.facefolio.utils.jsBridge.FacefolioSettings
+import com.tachiyuu.facefolio.utils.jsBridge.HealthBridge
 import com.tachiyuu.facefolio.utils.jsBridge.ThemeChange
 import com.tachiyuu.facefolio.utils.jsBridge.MaterialYouBridge
 import com.tachiyuu.facefolio.utils.rememberAutoDesktop
@@ -56,13 +58,15 @@ import androidx.webkit.ScriptHandler
 import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 fun FacefolioWebView(
     url: String,
     settingsVM: SettingsViewModel = viewModel(),
-    incomingUrl: StateFlow<String?>? = null
+    incomingUrl: StateFlow<String?>? = null,
+    settingsRequest: MutableStateFlow<Boolean>? = null
 ) {
     val context = LocalContext.current
     val activity = LocalActivity.current
@@ -211,27 +215,55 @@ fun FacefolioWebView(
     }
 
     LaunchedEffect(loadingState, userScripts) {
-        if (loadingState is LoadingState.Finished) {
+        if (loadingState is LoadingState.Finished && isLoading) {
             userScripts?.let { scripts ->
-                navigator.evaluateJavaScript(wrapScripts(scripts)) {
-                    isLoading = false
+                val documentStart = WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)
+                navigator.evaluateJavaScript(if (documentStart) "0" else wrapScripts(scripts)) {
+                    val view = webView ?: return@evaluateJavaScript
+                    WebViewCompat.postVisualStateCallback(view, 0L) {
+                        if (isLoading) {
+                            isLoading = false
+                            activity?.reportFullyDrawn()
+                        }
+                    }
                 }
             }
         }
     }
 
-    if (isError && isLoading) {
-        NetworkErrorDialog(
-            onDismiss = { activity?.finish() },
-            onRetry = { navigator.reload() }
-        )
-        return
+    // Ceiling only, so a page that never settles still opens; the reveal normally waits for paint
+    LaunchedEffect(isLoading) {
+        if (!isLoading) return@LaunchedEffect
+        delay(8000)
+        if (isLoading) {
+            isLoading = false
+            activity?.reportFullyDrawn()
+        }
+    }
+
+    // The splash stays until its reveal has finished; a reload from settings shows it again, settled
+    var splashDone by rememberSaveable { mutableStateOf(false) }
+    var coldStart by rememberSaveable { mutableStateOf(true) }
+    LaunchedEffect(isLoading) {
+        if (isLoading && splashDone) {
+            coldStart = false
+            splashDone = false
+        }
     }
 
     val colorScheme = MaterialTheme.colorScheme
     val originalColor = remember { mutableStateOf(themeColor) }
 
     var settingsToggle by rememberSaveable { mutableStateOf(false) }
+    // Launcher shortcut: settings stay reachable even if Facebook's header changes and the in-page button can't be placed
+    LaunchedEffect(settingsRequest) {
+        settingsRequest?.collect { requested ->
+            if (requested) {
+                settingsToggle = true
+                settingsRequest.value = false
+            }
+        }
+    }
     LaunchedEffect(settingsToggle) {
         if (settingsToggle) {
             setWindow(false)
@@ -250,6 +282,7 @@ fun FacefolioWebView(
                 }
             },
             onReload = {
+                settingsToggle = false
                 isLoading = true
                 viewModel.setThemeColor(Color.Transparent)
                 setWindow(settingsVM.immersiveMode.value)
@@ -269,17 +302,6 @@ fun FacefolioWebView(
         }
     }
 
-    if (isLoading) {
-        SplashLoading(
-            if (loadingState is LoadingState.Loading) {
-                loadingState.progress
-            } else {
-                0.8F
-            }
-        )
-    }
-
-
     LaunchedEffect(isDesktop) {
         val userAgent = if (isDesktop) DESKTOP_USER_AGENT else ""
         state.nativeWebView.settings.userAgentString = userAgent
@@ -292,7 +314,8 @@ fun FacefolioWebView(
     val lightScheme = remember { facefolioColorScheme(context, darkTheme = false) }
     val darkScheme = remember { facefolioColorScheme(context, darkTheme = true) }
 
-    WebView(
+    Box(modifier = Modifier.fillMaxSize()) {
+        WebView(
         modifier = Modifier
             .fillMaxSize()
             .background(themeColor)
@@ -313,6 +336,16 @@ fun FacefolioWebView(
         onCreated = { createdWebView ->
             webView = createdWebView
 
+            // Register document start script synchronously so the very first page load has filters attached
+            userScripts?.let { scripts ->
+                if (WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {
+                    documentStartScript?.remove()
+                    documentStartScript = WebViewCompat.addDocumentStartJavaScript(
+                        createdWebView, wrapScripts(scripts), setOf("https://*.facebook.com")
+                    )
+                }
+            }
+
             val cookieManager = CookieManager.getInstance()
             cookieManager.setAcceptCookie(true)
             cookieManager.setAcceptThirdPartyCookies(createdWebView, true)
@@ -322,7 +355,6 @@ fun FacefolioWebView(
                 isJavaScriptEnabled = true
 
                 androidWebSettings.apply {
-                    //isDebugInspectorInfoEnabled = true
                     domStorageEnabled = true
                     hideDefaultVideoPoster = true
                     mediaPlaybackRequiresUserGesture = false
@@ -330,6 +362,7 @@ fun FacefolioWebView(
             }
 
             createdWebView.apply {
+                addJavascriptInterface(HealthBridge, "HealthBridge")
                 addJavascriptInterface(
                     FacefolioSettings {
                         createdWebView.post { settingsToggle = true }
@@ -337,11 +370,23 @@ fun FacefolioWebView(
                     "SettingsBridge"
                 )
                 addJavascriptInterface(
-                    ThemeChange { c ->
-                        createdWebView.post {
-                            if (!settingsToggle) viewModel.setThemeColor(Color(c))
+                    ThemeChange(
+                        setThemeColor = { c ->
+                            createdWebView.post {
+                                if (!settingsToggle) viewModel.setThemeColor(Color(c))
+                            }
+                        },
+                        onReady = {
+                            createdWebView.post {
+                                WebViewCompat.postVisualStateCallback(createdWebView, 0L) {
+                                    if (isLoading) {
+                                        isLoading = false
+                                        activity?.reportFullyDrawn()
+                                    }
+                                }
+                            }
                         }
-                    },
+                    ),
                     "ThemeBridge"
                 )
                 addJavascriptInterface(
@@ -369,7 +414,25 @@ fun FacefolioWebView(
                 settings.setSupportZoom(true)
                 settings.builtInZoomControls = true
                 settings.displayZoomControls = false
+
             }
         }
     )
+
+    if (!splashDone) {
+        SplashLoading(
+            ready = !isLoading,
+            progress = (loadingState as? LoadingState.Loading)?.progress ?: 1f,
+            entrance = coldStart,
+            onFinished = { splashDone = true }
+        )
+    }
+
+    if (isError) {
+        OfflineScreen(
+            onExit = { activity?.finish() },
+            onRetry = { navigator.reload() }
+        )
+    }
+    }
 }

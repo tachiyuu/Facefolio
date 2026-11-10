@@ -29,4 +29,23 @@
     <string name="hide_sponsored_ads_from_your_feed">Masquer les publicités sponsorisées dans le flux</string>
     <string name="enable_download_button_on_media_view">Activer le bouton de téléchargement sur la vue média</string>
     <string name="facefolio_settings">Paramètres Facefolio</string>
+    <string name="feed_filters_title">Filtres détaillés du fil</string>
+    <string name="feed_filters_summary">Reels, Stories, suggestions, IA…</string>
+    <string name="settings_saved">Paramètres enregistrés</string>
+    <string name="reload_now">Recharger</string>
+    <string name="filters_hidden_count">%1$d masqués</string>
+    <string name="tabs_count">%1$d onglets</string>
+    <string name="done">Terminé</string>
+    <string name="exit">Quitter</string>
+    <string name="compat_title">Compatibilité Facebook</string>
+    <string name="compat_ok">Toutes les fonctions marchent avec le Facebook actuel</string>
+    <string name="compat_failed">Facebook a changé : %1$s peut ne pas fonctionner</string>
+    <string name="compat_pending">Vérifié après le chargement du fil</string>
+    <string name="splash_tagline">Social, sans le bruit</string>
+    <string name="offline_title">Vous êtes hors ligne</string>
+    <string name="offline_body">Facefolio n\'a pas pu joindre Facebook. Vérifiez votre connexion et réessayez. Votre connexion au compte est conservée.</string>
+    <string name="compat_short_ok">Compatible</string>
+    <string name="compat_short_failed">Mise à jour requise</string>
+    <string name="compat_short_pending">Vérification</string>
+    <string name="settings_shortcut">Paramètres</string>
 </resources>

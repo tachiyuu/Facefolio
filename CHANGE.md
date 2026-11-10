@@ -1,3 +1,13 @@
+## Facefolio - v1.0.1
+
+* **Launch**: the app opens without a visible switch. The system splash shows only the background colour and stays until the app has drawn its first frame; the logo tile then eases in, and the feed opens out of it once Facebook has actually painted.
+* **New screens**: an offline screen with Retry replaces the old network error dialog. Settings is rebuilt in Material 3 and shows whether Facebook still has everything the app relies on (*Facebook compatibility*). A long press on the app icon offers a *Settings* shortcut.
+* **Feed**: tabs are evenly spaced and stay correct on Notifications, Friends and Groups; Groups' own sub-tabs are no longer hidden. The settings button never covers one of Facebook's buttons. "Name and 90 others" reaction counts are hidden along with the other counts.
+* **Smoother**: scrolling is about 80 fps on a Pixel 7 (was about 62). The extra WebView hardware layer is gone, the script bundle is no longer sent twice, and the app's own scripts use about 5% of the main thread while scrolling.
+* **Text in the feed uses Facebook's own font again.** Be Vietnam Pro made some post text overflow its box, because Facebook sizes text for its own font; it brought no speed gain. The app's own screens keep Be Vietnam Pro.
+* Fix: on some launches the Facebook logo showed huge and clipped and the profile picture beside *What's on your mind?* was stretched.
+* New texts are translated into all the app's languages.
+
 ## Facefolio - v1.0.0
 
 * Rebranded and decoupled into **Facefolio** (`com.tachiyuu.facefolio`), an independent, distraction-free Facebook client.

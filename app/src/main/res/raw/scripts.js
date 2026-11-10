@@ -226,7 +226,9 @@ window.__mbFB = Object.freeze({
     // Tabs keep their own width (their content is laid out inside it); only the row is ours.
     // Facebook's .m containers are column flexboxes, hence the explicit direction. Other children
     // of the bar (the "‹ Notifications" title row on some pages) wrap below at full width, as before.
-    const { tablist: TABLIST, tab: TAB } = window.__mbFB;
+    const { tablist: FB_TABLIST, tab: TAB } = window.__mbFB;
+    // Only the main navigation bar (marked by apply()); in-page tablists such as Groups' "Your groups | Posts" stay Facebook's
+    const TABLIST = `${FB_TABLIST}[data-mb-nav]`;
     style.textContent = `
         ${TABLIST}:has(> ${TAB}:not([data-mb-unpinned]), > #mb-groups-tab:not([data-mb-unpinned])) {
             display: flex !important; flex-direction: row !important; flex-wrap: wrap !important;
@@ -234,7 +236,9 @@ window.__mbFB = Object.freeze({
         }
         /* Only pinned tabs get display flex; unpinned tabs are strictly hidden */
         ${TABLIST} > ${TAB}:not([data-mb-unpinned]), #mb-groups-tab:not([data-mb-unpinned]) {
-            flex: 1 1 0 !important; width: 0 !important; min-width: 0 !important; max-width: none !important;
+            /* min-width > 0: with a title row (basis 100%) beside them the line overflows and the row wraps below;
+               at 0 the tabs would share the line with it and collapse to nothing */
+            flex: 1 1 0 !important; width: 0 !important; min-width: 32px !important; max-width: none !important;
             height: 48px !important; margin: 0 !important;
             display: flex !important; flex-direction: column !important; align-items: center !important;
             justify-content: flex-start !important; pointer-events: auto !important;
@@ -292,9 +296,14 @@ window.__mbFB = Object.freeze({
     }
 
     function apply() {
-        const tablist = document.querySelector(TABLIST);
+        // The navigation bar: the tablist whose first tab is Home. Not found = Facebook's layout untouched.
+        let tabs = [];
+        const tablist = [...document.querySelectorAll(FB_TABLIST)].find(list => {
+            tabs = [...list.querySelectorAll(`:scope > ${TAB}`)];
+            return tabs.length >= 5 && keyOf(tabs[0], 0, tabs.length) === 'feed';
+        });
         if (!tablist) return;
-        const tabs = [...tablist.querySelectorAll(`:scope > ${TAB}`)];
+        if (!tablist.hasAttribute('data-mb-nav')) tablist.setAttribute('data-mb-nav', '');
         tabs.forEach((tab, i) => {
             const unpinned = !pins.has(keyOf(tab, i, tabs.length));
             if (unpinned !== tab.hasAttribute('data-mb-unpinned')) tab.toggleAttribute('data-mb-unpinned', unpinned);
@@ -308,10 +317,8 @@ window.__mbFB = Object.freeze({
         if (pins.has('groups') && tabs.length && !document.getElementById('mb-groups-tab')) {
             const plain = tabs.find(tab => tab.getAttribute('aria-selected') === 'false') || tabs[0];
             const glyph = plain.querySelector('.am > .native-text') || plain;
-            const tab = groupsTab(getComputedStyle(glyph).color);
-            const line = [...plain.children].find(child => child.offsetHeight === 2);
-            if (line) tab.style.borderBottom = `2px solid ${getComputedStyle(line).backgroundColor}`;
-            tabs[0].after(tab);
+            // No underline: Facebook's unselected tabs show none (theirs sits below the 48px tab box)
+            tabs[0].after(groupsTab(getComputedStyle(glyph).color));
         }
     }
 
@@ -622,12 +629,14 @@ window.onDomChange(() => {
       const rect = findAnchor()?.getBoundingClientRect();
       const visible = rect && rect.width > 0 && rect.bottom > 0 && rect.top < 120;
       if (!visible) { if (btn) btn.style.display = 'none'; return; }
+      const top = Math.round(rect.top + (rect.height - SIZE) / 2);
+      const left = Math.round(rect.left - SIZE - 8);
+      // Same glyph on other pages' headers (Notifications: search beside "mark all read"): never cover a button
+      const taken = document.elementsFromPoint(left + SIZE / 2, top + SIZE / 2)
+        .some(el => el.id !== BUTTON_ID && !el.closest(`#${BUTTON_ID}`) && el.closest('[role="button"], a, button'));
+      if (taken) { if (btn) btn.style.display = 'none'; return; }
       if (!btn) { btn = createButton(); document.body.appendChild(btn); }
-      Object.assign(btn.style, {
-        position: 'fixed', zIndex: '1001', display: 'flex',
-        top: `${Math.round(rect.top + (rect.height - SIZE) / 2)}px`,
-        left: `${Math.round(rect.left - SIZE - 8)}px`,
-      });
+      Object.assign(btn.style, { position: 'fixed', zIndex: '1001', display: 'flex', top: `${top}px`, left: `${left}px` });
     };
 
     place();

@@ -12,12 +12,17 @@ Where the M3 rebuild / stability pass stands (2026-11-10) and what is left.
 - Tab bar: evenly spaced, Groups tab icon centred. Counts hidden, including "Name and N others".
 
 ## Left to do
-1. **Groups tab underline**: our tab draws a visible 2px `border-bottom`, Facebook's own underline is
-   the bar colour (invisible). Drop ours or match theirs.
-2. **Other pages**: check tab bar and settings gear on Notifications, Friends, Groups, Messages
-   (old builds showed the gear floating on Groups and Friends navigation not taking).
-3. **Benchmarks**: re-run with a debuggable build (temporarily `isDebuggable = true` in release, never commit it):
-   `node tools/health-check.js --mobile-only`, `node tools/feed-audit.js`,
+Paused 2026-11-10 mid-way through items 1-3; the fixes below are committed but the benchmarks are not run.
+
+1. ~~Groups tab underline~~: done (our border removed).
+2. **Other pages**: done for Notifications (tabs had collapsed to 0 width beside the title row; gear
+   covered "mark all read"), Friends and Groups (our tab CSS now applies only to the main bar, marked
+   `data-mb-nav`, so Groups' own sub-tabs are Facebook's). Still to look at: `/messages/` shows only a blue
+   "Messages" header and an empty page; check whether that is Facebook's page or ours (compare with
+   scripts disabled). Re-check the home screen once more right after a cold start (one capture showed
+   a dark gear while the feed was still a skeleton).
+3. **Benchmarks**: not run yet. Re-run with a debuggable build (temporarily `isDebuggable = true` in
+   release, never commit it): `node tools/health-check.js --mobile-only`, `node tools/feed-audit.js`,
    `node tools/perf-bench.js --seconds 10`. Baseline: 62 fps, browser 80% of busy time.
 4. **Docs**: `docs/mockup/facefolio-m3.html` still says frame 0 is a system splash with the icon in a
    160 dp circle; it is now plain surface colour with the Compose tile easing in. Write `docs/ANALYSIS.md`

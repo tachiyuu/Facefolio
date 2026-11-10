@@ -1,9 +1,16 @@
+import java.util.Properties
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+}
+
+// Release signing comes from local.properties (release.storeFile, storePassword, keyAlias, keyPassword),
+// never from the repo
+val localProps = Properties().apply {
+    rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
 }
 
 android {
@@ -14,10 +21,19 @@ android {
         applicationId = "com.tachiyuu.facefolio"
         minSdk = 23
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        create("release") {
+            localProps.getProperty("release.storeFile")?.let { path -> storeFile = rootProject.file(path) }
+            storePassword = localProps.getProperty("release.storePassword")
+            keyAlias = localProps.getProperty("release.keyAlias")
+            keyPassword = localProps.getProperty("release.keyPassword")
+        }
     }
 
     buildTypes {
@@ -28,7 +44,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = if (localProps.getProperty("release.storeFile") != null)
+                signingConfigs.getByName("release") else signingConfigs.getByName("debug")
+            // ponytail: debug-key fallback only so CI (no keystore) can still build
         }
         debug {
             applicationIdSuffix = ".test"
